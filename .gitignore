@@ -9,6 +9,7 @@
 # Maven
 log/
 target/
+bin/
 
 # Temporary files
 *~
