@@ -38,7 +38,11 @@ public class ArduinoReader implements SerialPortEventListener, Closeable {
 	private final SerialPort port;
 	private final RandomAccessFile file;
 	private final MappedByteBuffer fileBuffer;
-	private boolean hasRemaining = true;
+	
+	private Object available = new Object();
+	private volatile boolean hasRemaining = true;
+	private volatile int waitPosition;
+	private volatile int bufferPosition;
 	
 	public ArduinoReader(String filename, int size) throws IOException {
 		file = new RandomAccessFile(filename, "rw");
@@ -52,13 +56,8 @@ public class ArduinoReader implements SerialPortEventListener, Closeable {
 			port.addEventListener(this);
 		} catch (SerialPortException e) {
 			e.printStackTrace();
-			try {
-				close();
-				throw new UnableToConnectToArduinoException();
-			} catch (Exception e1) {
-				e1.printStackTrace();
-				throw new UnableToConnectToArduinoException();
-			}
+			close();
+			throw new UnableToConnectToArduinoException();
 		}
 	}
 	
@@ -66,19 +65,41 @@ public class ArduinoReader implements SerialPortEventListener, Closeable {
 		return hasRemaining;
 	}
 	
-	public ByteBuffer getFileBuffer() {
-		return fileBuffer.asReadOnlyBuffer();
+	public ByteBuffer getUpdatedReadBuffer() {
+		ByteBuffer buffer = fileBuffer.asReadOnlyBuffer();
+		buffer.flip();
+		return buffer;
+	}
+	
+	public void waitForAvailable(int position) throws InterruptedException {
+		if (position >= fileBuffer.capacity()) {
+			throw new IndexOutOfBoundsException();
+		}
+		
+		synchronized (available) {
+			waitPosition = position;
+			while (bufferPosition < position) {
+				available.wait();
+			}
+		}
 	}
 
 	public void serialEvent(SerialPortEvent event) {
 		if (event.isRXCHAR()) {
-			int remaining = fileBuffer.remaining();
 			try {
-				if (remaining >= event.getEventValue()) {
-					fileBuffer.put(port.readBytes());
-				} else {
-					fileBuffer.put(port.readBytes(remaining));
-					hasRemaining = false;	
+				synchronized (available) {
+					int remaining = fileBuffer.remaining();
+					if (remaining >= event.getEventValue()) {
+						fileBuffer.put(port.readBytes());
+					} else {
+						fileBuffer.put(port.readBytes(remaining));
+						hasRemaining = false;	
+					}
+					bufferPosition = fileBuffer.position();
+					if (waitPosition <= bufferPosition) {
+						waitPosition = fileBuffer.capacity();
+						available.notifyAll();
+					}
 				}
 			} catch (SerialPortException ex) {
 				throw new ArduinoReadException();

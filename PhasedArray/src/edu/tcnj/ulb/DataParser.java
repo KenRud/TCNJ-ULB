@@ -2,14 +2,24 @@ package edu.tcnj.ulb;
 
 import java.nio.ByteBuffer;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class DataParser {
-	private final ByteBuffer buffer;
 	private final int numChannels;
 	private final int chunkSize;
 
+	private ByteBuffer buffer;
+	private ArduinoReader arduinoReader;
+	
 	public DataParser(ByteBuffer buffer, int numChannels, int chunkSize) {
 		this.buffer = buffer;
+		this.numChannels = numChannels;
+		this.chunkSize = chunkSize;
+	}
+	
+	public DataParser(ArduinoReader arduinoReader, int numChannels, int chunkSize) {
+		this.arduinoReader = arduinoReader;
+		this.buffer = arduinoReader.getUpdatedReadBuffer();
 		this.numChannels = numChannels;
 		this.chunkSize = chunkSize;
 	}
@@ -40,15 +50,31 @@ public class DataParser {
 
 				@Override
 				public Short[] next() {
+					if (!hasNext()) {
+						throw new NoSuchElementException();
+					}
+					waitForUpdatedBuffer();
 					Short[] chunk = new Short[chunkSize];
 					for (int i = 0; i < chunkSize; i += 2) {
-						chunk[i] = buffer.getShort(chunkIndex + i);
+						chunk[i] = buffer.getShort();
 					}
 					chunkIndex += (numChannels * chunkSize);
 					return chunk;
 				}
 
 			};
+		}
+		
+		private void waitForUpdatedBuffer() {
+			if (arduinoReader != null) {
+				try {
+					arduinoReader.waitForAvailable(chunkIndex + chunkSize);
+					buffer = arduinoReader.getUpdatedReadBuffer();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 }
