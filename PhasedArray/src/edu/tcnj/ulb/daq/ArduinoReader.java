@@ -1,4 +1,4 @@
-package edu.tcnj.ulb;
+package edu.tcnj.ulb.daq;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -15,19 +15,13 @@ import jssc.SerialPortException;
 import jssc.SerialPortList;
 
 /**
- * Reads the data from the Arduino. The Arduino must be on port /dev/ttyAMC1 or COM1.
+ * Reads the data from the Arduino. The Arduino must be on port /dev/ttyAMC[0-99] or COM[0-99].
  * Before running on Linux be sure to run the following command:
- * <code>stty -F /dev/ttyACM1 sane raw</code>
+ * <code>stty -F /dev/ttyACM[0-99] sane raw</code>
  * @author kruddick
  *
  */
 public class ArduinoReader implements SerialPortEventListener, Closeable {
-	public static final int BYTES_PER_SECOND = 360000;
-	public static final int BYTES_PER_MINUTE = BYTES_PER_SECOND * 60;
-	
-//	private static int ARDUINO_CHANNEL_BUFFER_SIZE = 1000;	// Bytes
-//	private static int ARDUINO_BUFFER_SIZE = 9 * ARDUINO_CHANNEL_BUFFER_SIZE;
-//	private static int ARDUINO_BUFFER_SIZE = 4095;
 	private static int BAUD_RATE = SerialPort.BAUDRATE_256000;
 	private static int DATA_BITS = SerialPort.DATABITS_8;
 	private static int STOP_BITS = SerialPort.STOPBITS_1;
@@ -72,7 +66,7 @@ public class ArduinoReader implements SerialPortEventListener, Closeable {
 	}
 	
 	public void waitForAvailable(int position) throws InterruptedException {
-		if (position >= fileBuffer.capacity()) {
+		if (position < 0 || position >= fileBuffer.capacity()) {
 			throw new IndexOutOfBoundsException();
 		}
 		
@@ -109,7 +103,7 @@ public class ArduinoReader implements SerialPortEventListener, Closeable {
 
 	private SerialPort openArduinoPort() {
 		String[] portNames = SerialPortList.getPortNames(Pattern
-				.compile("(ttyACM|COM)[0-9]{1,}"));
+				.compile("(ttyACM|COM)[0-9]{1,2}"));
 		for (int i = portNames.length - 1; i >= 0; i--) {
 			SerialPort port = new SerialPort(portNames[i]);
 			System.out.println(portNames[i]);
