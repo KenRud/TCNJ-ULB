@@ -1,3 +1,5 @@
+package edu.tcnj.ulb.dsp;
+
 /*************************************************************************
  *  Compilation:  javac FFT.java
  *  Execution:    java FFT N
@@ -132,6 +134,17 @@ public class FFT {
         System.out.println();
     }
 
+    // By Joe: display an array of double numbers to standard output
+    // This is for after we compute the magnitude
+    public static void show(double[] x, String title) {
+        System.out.println(title);
+        System.out.println("-------------------");
+        for (int i = 0; i < x.length; i++) {
+            System.out.println(x[i]);
+        }
+        System.out.println();
+    }
+
 
    /*********************************************************************
     *  Test client and sample execution
@@ -177,7 +190,7 @@ public class FFT {
     *  4.01805098805014E-17i
     *
     *********************************************************************/
-
+    /*
     public static void main(String[] args) { 
         int N = Integer.parseInt(args[0]);
         Complex[] x = new Complex[N];
@@ -205,5 +218,6 @@ public class FFT {
         Complex[] d = convolve(x, x);
         show(d, "d = convolve(x, x)");
     }
+    */
 
 }
