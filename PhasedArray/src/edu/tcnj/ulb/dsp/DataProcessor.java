@@ -5,6 +5,8 @@ import edu.tcnj.ulb.daq.DataParser;
 public class DataProcessor {
 	private final DataParser parser;
 	public static final int WINDOW_SIZE = 512;
+	public static final int TRANSMITTER_FREQUENCY = 6300;
+
 	public DataProcessor(DataParser parser) {
 		this.parser = parser;
 	}
@@ -28,20 +30,10 @@ public class DataProcessor {
 		for(int i = 0; i < parser.numChannels(); i++){
 			short[] channelData = parser.getChannel(i).get(index, length);
 			chunkWindow[i] = channelData;
-
-			// Testing FFT on random window
-			if(x == 1){
-				computeFFT(channelData);
-				x++;
-			}
-
-			for(int j = 0; j < channelData.length; j++){
-				//System.out.println("Channel " + i + ": " + channelData[j]);
-			} 
 		}
 
 		// TODO: send this window off for processing
-
+		computeFFT(chunkWindow[1]);
 
 	}
 
@@ -54,13 +46,19 @@ public class DataProcessor {
 		for(int i = 0; i < WINDOW_SIZE; i++){
 			temp = new Complex(timeDelayedSignal[i], 0);
 			complexSignal[i] = temp;
-			System.out.println(complexSignal[i].toString());
 		}
 
 		Complex[] frequencyResponse = FFT.fft(complexSignal);
 		double[] magnitude = computeMagnitude(frequencyResponse);
+		System.out.println(magnitude.length);
+		System.out.println("Resolution: " + FFT.calculateResolution(magnitude, 20000));
+		int[] points = desiredElements(FFT.calculateResolution(magnitude, 20000));
+		for(int i = 0; i < points.length; i++){
+			System.out.println("I" + i + "  " + points[i]);
+		}
 		//FFT.show(frequencyResponse, "frequencyResponse = fft(complexSignal)");
-		FFT.show(magnitude, "magnitude = frequencyResponse.forEach() --> abs()");
+		//FFT.show(magnitude, "magnitude = frequencyResponse.forEach() --> abs()");
+
 	}
 
 	private double[] computeMagnitude(Complex[] x){
@@ -71,6 +69,25 @@ public class DataProcessor {
 			magnitudeValues[i] = x[i].abs();
 		}
 		return magnitudeValues;
+	}
+
+	private int[] desiredElements(double resolution){
+
+		int[] indices = new int[5];
+		indices[2] = TRANSMITTER_FREQUENCY / (int) resolution;
+
+		for(int i = 0; i < 5; i++){
+			if(i !=2){
+				if(i < 2){
+					indices[i] = indices[2] + (i - 2); 
+				} else{
+					indices[i] = indices[2] + (i - 2);
+				}
+			}
+		}
+
+		return indices;
+
 	}
 
 }

@@ -145,6 +145,12 @@ public class FFT {
         System.out.println();
     }
 
+    // By Joe: calculate the FFT resolution
+    // In other words, what is the frequency difference between each element in the array
+    public static double calculateResolution(double[] fftVals, double samplingFreq){
+        return samplingFreq / (double) fftVals.length;
+    }
+
 
    /*********************************************************************
     *  Test client and sample execution
