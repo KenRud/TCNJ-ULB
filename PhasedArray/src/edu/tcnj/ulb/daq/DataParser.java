@@ -40,6 +40,9 @@ public class DataParser {
 	public int numChannels() {
 		return numChannels;
 	}
+	public int chunkSize(){
+		return chunkSize;
+	}
 	
 	public class ParsedChannel {
 		private final int channelOffset;
