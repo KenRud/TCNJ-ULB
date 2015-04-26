@@ -55,7 +55,8 @@ public class DataProcessor {
 		for(int i = 0; i < points.length; i++){
 			//System.out.println("I" + i + "  " + points[i]);
 		}
-
+		
+		Correlation.xcorr(magnitude);
 		boolean isMatch = matchDetection(points, magnitude);
 		if(isMatch){
 			System.out.println("Is Match " + isMatch);
@@ -89,8 +90,6 @@ public class DataProcessor {
 		
 		return indices;
 	}
-<<<<<<< HEAD
-
 	private boolean matchDetection(int[] indices, double[] magnitude){
 
 		boolean matchFound= false;
@@ -112,6 +111,4 @@ public class DataProcessor {
 		return matchFound;
 
 	}
-=======
->>>>>>> origin/master
 }
