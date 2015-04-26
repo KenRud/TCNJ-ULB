@@ -5,8 +5,20 @@ import edu.tcnj.ulb.daq.DataParser;
 public class DataProcessor {
 	public static final int WINDOW_SIZE = 512;
 	public static final int TRANSMITTER_FREQUENCY = 6300;
-	
+	public static double[] SEARCH_SIGNAL = new double[WINDOW_SIZE];
+	public static final double SAMPLING_RATE = 20000;
+
 	private final DataParser parser;
+
+	static{
+		// Amplitude needs to be determined
+		double amplitude = 1.0;
+		for(int sample = 0; sample < WINDOW_SIZE; sample++){
+			double time = (double) sample / SAMPLING_RATE;
+			// TODO: TEST THIS!
+			SEARCH_SIGNAL[sample] = amplitude * Math.sin(2 * Math.PI * TRANSMITTER_FREQUENCY * time);
+		}
+	}
 
 	public DataProcessor(DataParser parser) {
 		this.parser = parser;
@@ -46,20 +58,23 @@ public class DataProcessor {
 			temp = new Complex(timeDelayedSignal[i], 0);
 			complexSignal[i] = temp;
 		}
-
+		// TODO: get rid of all my test and printing bullshit
 		Complex[] frequencyResponse = FFT.fft(complexSignal);
 		double[] magnitude = computeMagnitude(frequencyResponse);
-		System.out.println(magnitude.length);
-		System.out.println("Resolution: " + FFT.calculateResolution(magnitude, 20000));
+		//System.out.println(magnitude.length);
+		//System.out.println("Resolution: " + FFT.calculateResolution(magnitude, 20000));
 		int[] points = desiredElements(FFT.calculateResolution(magnitude, 20000));
 		for(int i = 0; i < points.length; i++){
 			//System.out.println("I" + i + "  " + points[i]);
 		}
-		
-		Correlation.xcorr(magnitude);
+		// TEST TRANSMITTER SIGNAL
+		for(int i = 0; i < SEARCH_SIGNAL.length; i++){
+			System.out.println(i + " : " + SEARCH_SIGNAL[i]);
+		}
+		//Correlation.xcorr(magnitude);
 		boolean isMatch = matchDetection(points, magnitude);
 		if(isMatch){
-			System.out.println("Is Match " + isMatch);
+			//System.out.println("Is Match " + isMatch);
 		}
 		//FFT.show(frequencyResponse, "frequencyResponse = fft(complexSignal)");
 		//FFT.show(magnitude, "magnitude = frequencyResponse.forEach() --> abs()");
