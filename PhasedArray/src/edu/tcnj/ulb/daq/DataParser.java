@@ -25,6 +25,25 @@ public class DataParser {
 		chunkSeparation = numChannels * chunkSize;
 	}
 	
+	public int size() {
+		if (arduinoReader != null) {
+			buffer = arduinoReader.getUpdatedReadBuffer();
+		}
+		return buffer.capacity();
+	}
+	
+	public int channelSize() {
+		return size() / numChannels;
+	}
+	
+	public int numChannels() {
+		return numChannels;
+	}
+	
+	public int chunkSize(){
+		return chunkSize;
+	}
+
 	public ParsedChannel getChannel(int channel) {
 		if (channel >= numChannels) {
 			throw new IndexOutOfBoundsException(String.format(
@@ -35,13 +54,6 @@ public class DataParser {
 			return new LiveParsedChannel(channel);
 		}
 		return new ParsedChannel(channel);
-	}
-	
-	public int numChannels() {
-		return numChannels;
-	}
-	public int chunkSize(){
-		return chunkSize;
 	}
 	
 	public class ParsedChannel {
