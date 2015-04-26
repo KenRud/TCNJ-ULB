@@ -89,6 +89,7 @@ public class DataProcessor {
 		
 		return indices;
 	}
+<<<<<<< HEAD
 
 	private boolean matchDetection(int[] indices, double[] magnitude){
 
@@ -111,4 +112,6 @@ public class DataProcessor {
 		return matchFound;
 
 	}
+=======
+>>>>>>> origin/master
 }
