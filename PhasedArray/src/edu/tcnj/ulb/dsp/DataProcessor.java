@@ -1,7 +1,5 @@
 package edu.tcnj.ulb.dsp;
 
-import java.util.Arrays;
-
 import edu.tcnj.ulb.daq.DataParser;
 
 public class DataProcessor {
@@ -11,8 +9,19 @@ public class DataProcessor {
 	private static final double PHI_INCREMENT = 1;
 	
 	public static final int SAMPLE_FREQUENCY = 20000;
+	public static double[] SEARCH_SIGNAL = new double[WINDOW_SIZE];
 
 	private final DataParser parser;
+
+	static{
+		// Amplitude needs to be determined
+		double amplitude = 1.0;
+		for(int sample = 0; sample < WINDOW_SIZE; sample++){
+			double time = (double) sample / SAMPLE_FREQUENCY;
+			// TODO: TEST THIS!
+			SEARCH_SIGNAL[sample] = amplitude * Math.sin(2 * Math.PI * TRANSMITTER_FREQUENCY * time);
+		}
+	}
 
 	public DataProcessor(DataParser parser) {
 		this.parser = parser;
@@ -30,7 +39,7 @@ public class DataProcessor {
 
 	private short[][] assembleWindow(int index, int length){
 		short[][] chunkWindow = new short[parser.numChannels()][];
-		int x = 1; // TODO Is this "x" being used for anything?
+		int x = 1; // TODO @Joe, is this "x" being used for anything?
 		for(int i = 0; i < parser.numChannels(); i++){
 			short[] channelData = parser.getChannel(i).get(index, length);
 			chunkWindow[i] = channelData;
@@ -41,37 +50,14 @@ public class DataProcessor {
 	private void processAllAngles(short[][] window) {
 		for (double theta = 0; theta < 360; theta += THETA_INCREMENT) {
 			for (double phi = 0; phi < 90; phi += PHI_INCREMENT) {
-				short[] combinedWindow = combine(window, phi, theta);
-				computeFFT(combinedWindow);
+				PhasedArray array = new PhasedArray(phi, theta, window);
+				int[] combinedSignal = array.combineChannels();
+				computeFFT(combinedSignal);
 			}
 		}
 	}
-	
-	private short[] combine(short[][] window, double phi, double theta) {
-		PhasedArray array = new PhasedArray(phi, theta);
-		
-		// Compute the delayed window
-		short[][] delayedWindow = new short[window.length][];
-		for (int channel = 0; channel < window.length; channel++) {
-			int delay = array.getDelay(channel);
-			short[] samples = delayedWindow[channel];
-			short[] delayedSamples = new short[samples.length + delay];
-			System.arraycopy(samples, 0, delayedSamples, delay, samples.length);
-			delayedWindow[channel] = delayedSamples;
-		}
-		
-		int idx;
-		short[] combinedWindow = new short[];
-		while (true) {
-			
-		}
-		
-//		int length = Arrays.stream(delayedWindow).map(w -> w.length).max((a, b) -> a - b).get();
-		
-		return window[1];
-	}
 
-	private void computeFFT(short[] timeDelayedSignal){
+	private void computeFFT(int[] timeDelayedSignal){
 		Complex[] complexSignal = new Complex[WINDOW_SIZE];
 		Complex temp;
 
@@ -80,14 +66,25 @@ public class DataProcessor {
 			temp = new Complex(timeDelayedSignal[i], 0);
 			complexSignal[i] = temp;
 		}
-
+		// TODO: get rid of all my test and printing bullshit
 		Complex[] frequencyResponse = FFT.fft(complexSignal);
 		double[] magnitude = computeMagnitude(frequencyResponse);
-		System.out.println(magnitude.length);
-		System.out.println("Resolution: " + FFT.calculateResolution(magnitude, SAMPLE_FREQUENCY));
-		int[] points = desiredElements(FFT.calculateResolution(magnitude, SAMPLE_FREQUENCY));
+		
+		//System.out.println(magnitude.length);
+		//System.out.println("Resolution: " + FFT.calculateResolution(magnitude, 20000));
+		int[] points = desiredElements(FFT.calculateResolution(magnitude, 20000));
+
 		for(int i = 0; i < points.length; i++){
-			System.out.println("I" + i + "  " + points[i]);
+			//System.out.println("I" + i + "  " + points[i]);
+		}
+		// TEST TRANSMITTER SIGNAL
+		for(int i = 0; i < SEARCH_SIGNAL.length; i++){
+			System.out.println(i + " : " + SEARCH_SIGNAL[i]);
+		}
+		//Correlation.xcorr(magnitude);
+		boolean isMatch = matchDetection(points, magnitude);
+		if(isMatch){
+			//System.out.println("Is Match " + isMatch);
 		}
 		//FFT.show(frequencyResponse, "frequencyResponse = fft(complexSignal)");
 		//FFT.show(magnitude, "magnitude = frequencyResponse.forEach() --> abs()");
@@ -117,5 +114,26 @@ public class DataProcessor {
 		}
 		
 		return indices;
+	}
+	private boolean matchDetection(int[] indices, double[] magnitude){
+
+		boolean matchFound= false;
+		double averagePower = 0;
+		for (int i = 0; i < magnitude.length; i++){
+			averagePower = averagePower + magnitude[i];
+		}
+
+		averagePower = averagePower / magnitude.length;
+
+		for (int i = 0; i < indices.length; i++){
+			// If our 6.3kHz points are greater than 1.5 times the energy, match
+			// This should be worked out correctly
+			if (magnitude[indices[i]] > (1.5 * averagePower)) {
+				matchFound = true;
+			}
+		}
+
+		return matchFound;
+
 	}
 }

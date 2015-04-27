@@ -6,13 +6,18 @@ import static java.lang.Math.sin;
 import mikera.vectorz.Vector3;
 
 /**
+ * Simulates phasing an array of audio channels so that the structure points in a particular
+ * direction. Phi represents the angle of inclination where 0 degrees represents a vector pointing
+ * straight down. Theta represents the horizontal angle which corresponds to cardinal directions.
+ * The diagram below establishes the required geometry of the audio channels.
+ * 
  *  ====> Movement direction (theta = 0)
  *  ___ ___ ___   
  * |_6_|_3_|_0_| 
  * |_7_|_4_|_1_|
  * |_8_|_5_|_2_|
  * 
- * @author kruddick
+ * @author Kenneth Ruddick
  *
  */
 public class PhasedArray {
@@ -21,6 +26,10 @@ public class PhasedArray {
 	private static final Vector3[] NODES = new Vector3[9];
 	
 	private final int[] delays = new int[9];
+	
+	private short[][] window;
+	private int maxAdvance;
+	private int maxDelay;
 	
 	static {
 		int idx = 0;
@@ -32,16 +41,58 @@ public class PhasedArray {
 		}
 	}
 
-	public PhasedArray(double phi, double theta) {
-		Vector3 plane = Vector3.of(cos(theta) * cos(phi), sin(theta) * cos(phi), sin(phi));
-		for (int i = 0; i < NODES.length; i++) {
-			Vector3 phasedNode = NODES[i].copy();
-			phasedNode.projectToPlane(plane, 1);
-			delays[i] = (int) (SAMPLE_FREQUENCY * phasedNode.getZ() / SPEED_OF_SOUND);
+	public PhasedArray(double phi, double theta, short[][] window) {
+		setWindow(window);
+		calculateChannelDelays(phi, theta);
+	}
+
+	public void setWindow(short[][] window) {
+		this.window = window;
+		calculateMaxAdvance();
+		calculateMaxDelay();
+	}
+	
+	/**
+	 * Combines all of the channels from the window with the appropriate phasing that corresponds
+	 * to the direction of sensitivity. The combined signal is not normalized.
+	 * @return A signal signal created by combining the phased channels. This signal is not
+	 * normalized. The signal may be longer than each of the individual channels.
+	 */
+	public int[] combineChannels() {
+		int sequenceLength = maxAdvance + maxDelay + window.length;
+		int[] result = new int[sequenceLength];
+		for (int channel = 0; channel < window.length; channel++) {
+			short[] sequence = window[channel];
+			int advance = delays[channel] + maxAdvance;
+			for (int i = 0; i < sequence.length; i++) {
+				result[i + advance] += sequence[i];
+			}
+		}
+		return result;
+	}
+	
+	private void calculateMaxDelay() {
+		maxDelay = delays[0];
+		for (int i = 1; i < delays.length; i++) {
+			maxDelay = Math.max(maxDelay, delays[i]);
 		}
 	}
 	
-	public int getDelay(int channel) {
-		return delays[channel];
+	private void calculateMaxAdvance() {
+		int min = delays[0];
+		for (int i = 1; i < delays.length; i++) {
+			min = Math.min(min, delays[i]);
+		}
+		maxAdvance = Math.abs(min);
+	}
+	
+	private void calculateChannelDelays(double phi, double theta) {
+		Vector3 plane = Vector3.of(cos(theta) * sin(phi), sin(theta) * sin(phi), cos(phi));
+		for (int i = 0; i < NODES.length; i++) {
+			Vector3 phasedNode = NODES[i].copy();
+			// TODO Find out what the "distance" parameter means in Vector#projectToPlane()
+			phasedNode.projectToPlane(plane, 0);
+			delays[i] = (int) (SAMPLE_FREQUENCY * phasedNode.getZ() / SPEED_OF_SOUND);
+		}
 	}
 }
