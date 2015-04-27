@@ -1,5 +1,6 @@
 package edu.tcnj.ulb.dsp;
 
+import static edu.tcnj.ulb.dsp.DataProcessor.SAMPLE_FREQUENCY;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import mikera.vectorz.Vector3;
@@ -19,7 +20,7 @@ public class PhasedArray {
 	private static final double SPEED_OF_SOUND = 1500;
 	private static final Vector3[] NODES = new Vector3[9];
 	
-	private final Vector3[] phasedNodes = new Vector3[9];
+	private final int[] delays = new int[9];
 	
 	static {
 		int idx = 0;
@@ -34,12 +35,13 @@ public class PhasedArray {
 	public PhasedArray(double phi, double theta) {
 		Vector3 plane = Vector3.of(cos(theta) * cos(phi), sin(theta) * cos(phi), sin(phi));
 		for (int i = 0; i < NODES.length; i++) {
-			phasedNodes[i] = NODES[i].copy();
-			phasedNodes[i].projectToPlane(plane, 1);
+			Vector3 phasedNode = NODES[i].copy();
+			phasedNode.projectToPlane(plane, 1);
+			delays[i] = (int) (SAMPLE_FREQUENCY * phasedNode.getZ() / SPEED_OF_SOUND);
 		}
 	}
 	
-	public double getTimeDelay(int channel) {
-		return phasedNodes[channel].getZ() / SPEED_OF_SOUND;
+	public int getDelay(int channel) {
+		return delays[channel];
 	}
 }

@@ -1,11 +1,17 @@
 package edu.tcnj.ulb.dsp;
 
+import java.util.Arrays;
+
 import edu.tcnj.ulb.daq.DataParser;
 
 public class DataProcessor {
-	public static final int WINDOW_SIZE = 512;
-	public static final int TRANSMITTER_FREQUENCY = 6300;
+	private static final int WINDOW_SIZE = 512;
+	private static final int TRANSMITTER_FREQUENCY = 6300;
+	private static final double THETA_INCREMENT = 1;
+	private static final double PHI_INCREMENT = 1;
 	
+	public static final int SAMPLE_FREQUENCY = 20000;
+
 	private final DataParser parser;
 
 	public DataProcessor(DataParser parser) {
@@ -18,8 +24,7 @@ public class DataProcessor {
 		// length of a single window.
 		for(int idx = 0; idx < parser.channelSize(); idx += WINDOW_SIZE) {
 			short[][] window = assembleWindow(idx, WINDOW_SIZE);
-			short[] combinedWindow = combine(window);
-			computeFFT(combinedWindow);
+			processAllAngles(window);
 		}
 	}
 
@@ -33,7 +38,36 @@ public class DataProcessor {
 		return chunkWindow;
 	}
 	
-	private short[] combine(short[][] window) {
+	private void processAllAngles(short[][] window) {
+		for (double theta = 0; theta < 360; theta += THETA_INCREMENT) {
+			for (double phi = 0; phi < 90; phi += PHI_INCREMENT) {
+				short[] combinedWindow = combine(window, phi, theta);
+				computeFFT(combinedWindow);
+			}
+		}
+	}
+	
+	private short[] combine(short[][] window, double phi, double theta) {
+		PhasedArray array = new PhasedArray(phi, theta);
+		
+		// Compute the delayed window
+		short[][] delayedWindow = new short[window.length][];
+		for (int channel = 0; channel < window.length; channel++) {
+			int delay = array.getDelay(channel);
+			short[] samples = delayedWindow[channel];
+			short[] delayedSamples = new short[samples.length + delay];
+			System.arraycopy(samples, 0, delayedSamples, delay, samples.length);
+			delayedWindow[channel] = delayedSamples;
+		}
+		
+		int idx;
+		short[] combinedWindow = new short[];
+		while (true) {
+			
+		}
+		
+//		int length = Arrays.stream(delayedWindow).map(w -> w.length).max((a, b) -> a - b).get();
+		
 		return window[1];
 	}
 
@@ -50,8 +84,8 @@ public class DataProcessor {
 		Complex[] frequencyResponse = FFT.fft(complexSignal);
 		double[] magnitude = computeMagnitude(frequencyResponse);
 		System.out.println(magnitude.length);
-		System.out.println("Resolution: " + FFT.calculateResolution(magnitude, 20000));
-		int[] points = desiredElements(FFT.calculateResolution(magnitude, 20000));
+		System.out.println("Resolution: " + FFT.calculateResolution(magnitude, SAMPLE_FREQUENCY));
+		int[] points = desiredElements(FFT.calculateResolution(magnitude, SAMPLE_FREQUENCY));
 		for(int i = 0; i < points.length; i++){
 			System.out.println("I" + i + "  " + points[i]);
 		}
