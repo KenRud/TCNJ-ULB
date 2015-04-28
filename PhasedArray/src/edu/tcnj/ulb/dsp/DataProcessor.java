@@ -82,7 +82,7 @@ public class DataProcessor {
 			System.out.println(i + " : " + SEARCH_SIGNAL[i]);
 		}
 		//Correlation.xcorr(magnitude);
-		boolean isMatch = matchDetection(points, magnitude);
+		boolean isMatch = matchDetectionFFT(points, magnitude);
 		if(isMatch){
 			//System.out.println("Is Match " + isMatch);
 		}
@@ -115,7 +115,7 @@ public class DataProcessor {
 		
 		return indices;
 	}
-	private boolean matchDetection(int[] indices, double[] magnitude){
+	private boolean matchDetectionFFT(int[] indices, double[] magnitude){
 
 		boolean matchFound= false;
 		double averagePower = 0;
