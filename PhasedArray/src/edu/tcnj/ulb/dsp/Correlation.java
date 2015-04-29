@@ -1,7 +1,6 @@
 package edu.tcnj.ulb.dsp;
 
 import java.util.Arrays;
-import java.io.*;
 
 public class Correlation
 {

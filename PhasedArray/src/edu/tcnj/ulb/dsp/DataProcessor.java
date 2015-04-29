@@ -5,8 +5,8 @@ import edu.tcnj.ulb.daq.DataParser;
 public class DataProcessor {
 	private static final int WINDOW_SIZE = 512;
 	private static final int TRANSMITTER_FREQUENCY = 6300;
-	private static final double THETA_INCREMENT = 1;
-	private static final double PHI_INCREMENT = 1;
+	private static final double THETA_INCREMENT = 45;
+	private static final double PHI_INCREMENT = 45;
 	
 	public static final int SAMPLE_FREQUENCY = 20000;
 	public static double[] SEARCH_SIGNAL = new double[WINDOW_SIZE];
