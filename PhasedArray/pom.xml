@@ -6,7 +6,7 @@
 	<artifactId>PhasedArray</artifactId>
 	<version>0.0.1</version>
 	<packaging>jar</packaging>
-	<description>Software for TCNJ ULB that captures sampled analog data from an array of hydrophones and uses digital techiques for filtering and beam forming.</description>
+	<description>Software for TCNJ ULB that captures sampled analog data from an array of hydrophones and uses digital techniques for filtering and beam forming.</description>
 	<organization>
 		<name>The College of New Jersey</name>
 		<url>http://tcnj.edu</url>
@@ -16,7 +16,7 @@
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
 			<resource>
-				<directory>resources</directory>
+				<directory>src/resources</directory>
 			</resource>
 		</resources>
 		
@@ -51,7 +51,7 @@
 			    <artifactId>javafx-maven-plugin</artifactId>
 			    <version>2.0</version>
 			    <configuration>
-			        <mainClass>edu.tcnj.ulb.application.Main</mainClass>
+			        <mainClass>edu.tcnj.ulb.application.MainApp</mainClass>
 			    </configuration>
 		     	<dependencies>
 	                <dependency>
