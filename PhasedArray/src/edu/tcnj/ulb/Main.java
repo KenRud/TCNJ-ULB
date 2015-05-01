@@ -1,14 +1,8 @@
 package edu.tcnj.ulb;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel.MapMode;
 
-import edu.tcnj.ulb.daq.ArduinoReader;
-import edu.tcnj.ulb.daq.DataParser;
-import edu.tcnj.ulb.dsp.DataProcessor;
+import edu.tcnj.ulb.daq.Recording;
 import edu.tcnj.ulb.ui.Menu;
 import edu.tcnj.ulb.ui.Prompt;
 
@@ -30,23 +24,20 @@ public class Main {
 	}
 	
 	private static void recordLiveData() {
-		String filename = Prompt.getString("Enter a destination file name");
+		String path = Prompt.getString("Recording destination");
+		Recording recording = Recording.create(path, Recording.BYTES_PER_SECOND * 10);
+		recording.start();
 		
-		try (ArduinoReader reader = new ArduinoReader(filename, FILE_SIZE)) {
-			System.out.println("Recording started.");
-			reader.start();
-			int i = 0;
-			while(reader.hasRemaining()) {
-				// TODO Change this to something else
-				Thread.sleep(5000);
-				System.out.printf("%d seconds have recorded\n", ++i * 5);
-			}
-			System.out.println("Recording complete, transferring to file.");
-		} catch (FileNotFoundException e) {
-			System.out.printf("The specified file could not be found: %s\n", e.getMessage());
-		} catch (IOException e) {
-			System.out.printf("Unable to open the file: %s\n", e.getMessage());
+		try {
+			Thread.sleep(60000);
 		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try {
+			recording.stop();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -55,34 +46,38 @@ public class Main {
 	}
 	
 	private static void processFile() {
-		String filename = Prompt.getString("Enter a source file name");
-		
-		try (RandomAccessFile file = new RandomAccessFile(filename, "r")) {
-			MappedByteBuffer fileBuffer = file.getChannel().map(MapMode.READ_ONLY, 0, file.length());
-			DataParser parser = new DataParser(fileBuffer, NUM_CHANNELS, CHUNK_SIZE);
-			DataProcessor processor = new DataProcessor(parser);
-			processor.process();
-		} catch (FileNotFoundException e) {
-			System.out.printf("The specified file could not be found: %s\n", e.getMessage());
+		String path = Prompt.getString("Recording source path");
+		try {
+			Recording recording = Recording.load(path);
+			System.out.printf("Timestamp: %s%n", recording.getMetaData().getTimestamp());
+			System.out.printf("Filenames: %s%n", recording.getMetaData().getFilenames());
 		} catch (IOException e) {
-			System.out.printf("Unable to open the file: %s\n", e.getMessage());
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
+//		try (RandomAccessFile file = new RandomAccessFile(path, "r")) {
+//			MappedByteBuffer fileBuffer = file.getChannel().map(MapMode.READ_ONLY, 0, file.length());
+//			DataParser parser = new DataParser(fileBuffer, NUM_CHANNELS, CHUNK_SIZE);
+//			DataProcessor processor = new DataProcessor(parser);
+//			processor.process();
+//		} catch (FileNotFoundException e) {
+//			System.out.printf("The specified file could not be found: %s\n", e.getMessage());
+//		} catch (IOException e) {
+//			System.out.printf("Unable to open the file: %s\n", e.getMessage());
+//		}
 	}
 	
 	private static void recordAndProcess() {
-		String filename = Prompt.getString("Enter a destination file name");
-		
-		try (ArduinoReader reader = new ArduinoReader(filename, FILE_SIZE)) {
-			reader.start();
-			DataParser parser = new DataParser(reader, NUM_CHANNELS, CHUNK_SIZE);
-			DataProcessor processor = new DataProcessor(parser);
-			processor.process();
-		} catch (FileNotFoundException e) {
-			System.out.printf("The specified file could not be found: %s\n", e.getMessage());
-		} catch (IOException e) {
-			System.out.printf("Unable to open the file: %s\n", e.getMessage());
-		}
-		
-		System.out.println("Program terminated.");
+//		String filename = Prompt.getString("Enter a destination directory name");
+//		
+//		try (ArduinoReader reader = new ArduinoReader(filename, FILE_SIZE)) {
+//			reader.start();
+//			DataParser parser = new DataParser(reader, NUM_CHANNELS, CHUNK_SIZE);
+//			DataProcessor processor = new DataProcessor(parser);
+//			processor.process();
+//		}
+//		
+//		System.out.println("Program terminated.");
 	}
 }

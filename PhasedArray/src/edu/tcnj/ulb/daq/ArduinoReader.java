@@ -1,11 +1,15 @@
 package edu.tcnj.ulb.daq;
 
 import java.io.Closeable;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
+import java.nio.file.Paths;
+import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import jssc.SerialPort;
@@ -30,20 +34,25 @@ public class ArduinoReader implements SerialPortEventListener, Closeable {
 			+ SerialPort.MASK_CTS + SerialPort.MASK_DSR;
 
 	private final SerialPort port;
-	private final RandomAccessFile file;
-	private final MappedByteBuffer fileBuffer;
+	private final String path;
+	private final int fileSize;
+	private final Consumer<String> newFileListener;
 	
 	private Object available = new Object();
-	private volatile boolean hasRemaining = true;
 	private volatile int waitPosition;
 	private volatile int bufferPosition;
 	
-	public ArduinoReader(String filename, int size) throws IOException {
-		file = new RandomAccessFile(filename, "rw");
-		fileBuffer = file.getChannel().map(MapMode.READ_WRITE, 0, size);
+	private RandomAccessFile file;
+	private MappedByteBuffer fileBuffer;
+	
+	public ArduinoReader(String path, int fileSize, Consumer<String> listener) {
+		this.path = path;
+		this.fileSize = fileSize;
+		this.newFileListener = listener;
+		openNewFile();
 		port = openArduinoPort();
 	}
-
+	
 	public void start() {
 		// Attempts to add the event listener
 		try {
@@ -55,8 +64,9 @@ public class ArduinoReader implements SerialPortEventListener, Closeable {
 		}
 	}
 	
-	public boolean hasRemaining() {
-		return hasRemaining;
+	public void stop() {
+//		writePortDataToFile();
+		close();
 	}
 	
 	public ByteBuffer getUpdatedReadBuffer() {
@@ -80,24 +90,60 @@ public class ArduinoReader implements SerialPortEventListener, Closeable {
 
 	public void serialEvent(SerialPortEvent event) {
 		if (event.isRXCHAR()) {
-			try {
-				synchronized (available) {
-					int remaining = fileBuffer.remaining();
-					if (remaining >= event.getEventValue()) {
+			writePortDataToFile();
+		}
+	}
+
+	private void writePortDataToFile() {
+		try {
+			synchronized (available) {
+				int remaining = fileBuffer.remaining();
+				if (remaining >= port.getInputBufferBytesCount()) {
+					// This buffer can fit all the incoming bytes
+					fileBuffer.put(port.readBytes());
+				} else {
+					// Read as many bytes as possible and then continue with a new file
+					fileBuffer.put(port.readBytes(remaining));
+					openNewFile();
+					// Read remaining data
+					if (port.getInputBufferBytesCount() > 0) {
 						fileBuffer.put(port.readBytes());
-					} else {
-						fileBuffer.put(port.readBytes(remaining));
-						hasRemaining = false;	
-					}
-					bufferPosition = fileBuffer.position();
-					if (waitPosition <= bufferPosition) {
-						waitPosition = fileBuffer.capacity();
-						available.notifyAll();
 					}
 				}
-			} catch (SerialPortException ex) {
-				throw new ArduinoReadException();
+				bufferPosition = fileBuffer.position();
+				if (waitPosition <= bufferPosition) {
+					waitPosition = fileBuffer.capacity();
+					available.notifyAll();
+				}
 			}
+		} catch (SerialPortException ex) {
+			throw new ArduinoReadException();
+		}
+	}
+	
+	private void openNewFile() {
+		String filename = UUID.randomUUID().toString();
+		String filepath = Paths.get(path, filename).toString();
+		try {
+			// Close the currently opened file
+			if (file != null) {
+				file.close();
+			}
+
+			// Attempt to open a new memory-mapped file
+			file = new RandomAccessFile(filepath, "rw");
+			fileBuffer = file.getChannel().map(MapMode.READ_WRITE, 0, fileSize);
+			
+			// Provide the new file name to the listener
+			if (newFileListener != null) {
+				newFileListener.accept(filename);
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
