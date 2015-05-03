@@ -18,11 +18,13 @@ public class RecordingMetaData implements Serializable {
 	
 	private transient String path;
 	
+	private final int fileSize;
 	private Instant timestamp;
+	private int stopPosition;
 	private ArrayList<String> filenames;
 	
-	public static RecordingMetaData create(String path) {
-		return new RecordingMetaData(path);
+	public static RecordingMetaData create(String path, int fileSize) {
+		return new RecordingMetaData(path, fileSize);
 	}
 	
 	public static RecordingMetaData load(String path) throws IOException {
@@ -40,17 +42,14 @@ public class RecordingMetaData implements Serializable {
 		return meta;
 	}
 	
-	private RecordingMetaData(String path) {
+	private RecordingMetaData(String path, int fileSize) {
 		this.path = path;
+		this.fileSize = fileSize;
 		filenames = new ArrayList<>();
 	}
-	
+
 	public Instant getTimestamp() {
 		return timestamp;
-	}
-	
-	public List<String> getFilenames() {
-		return Collections.unmodifiableList(filenames);
 	}
 	
 	protected void setTimestamp() {
@@ -58,6 +57,10 @@ public class RecordingMetaData implements Serializable {
 			throw new IllegalStateException("Timestamps cannot be changed once set");
 		}
 		timestamp = Instant.now();
+	}
+	
+	public List<String> getFilenames() {
+		return Collections.unmodifiableList(filenames);
 	}
 	
 	protected void addRecordingFile(String filename) {
@@ -68,6 +71,18 @@ public class RecordingMetaData implements Serializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public int getStopPosition() {
+		return stopPosition;
+	}
+	
+	protected void setStopPosition(int position) {
+		stopPosition = position;
+	}
+	
+	public int fileSize() {
+		return fileSize;
 	}
 	
 	protected void save() throws IOException {

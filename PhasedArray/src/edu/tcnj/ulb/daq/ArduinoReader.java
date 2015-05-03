@@ -64,9 +64,10 @@ public class ArduinoReader implements SerialPortEventListener, Closeable {
 		}
 	}
 	
-	public void stop() {
+	public int stop() {
 //		writePortDataToFile();
 		close();
+		return bufferPosition;
 	}
 	
 	public ByteBuffer getUpdatedReadBuffer() {

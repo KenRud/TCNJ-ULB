@@ -78,16 +78,16 @@ public class DataProcessor {
 			//System.out.println("I" + i + "  " + points[i]);
 		}
 		// TEST TRANSMITTER SIGNAL
-		for(int i = 0; i < SEARCH_SIGNAL.length; i++){
-			System.out.println(i + " : " + SEARCH_SIGNAL[i]);
-		}
+//		for(int i = 0; i < SEARCH_SIGNAL.length; i++){
+//			System.out.println(i + " : " + SEARCH_SIGNAL[i]);
+//		}
 		//Correlation.xcorr(magnitude);
 		boolean isMatch = matchDetectionFFT(points, magnitude);
 		if(isMatch){
 			//System.out.println("Is Match " + isMatch);
 		}
 		//FFT.show(frequencyResponse, "frequencyResponse = fft(complexSignal)");
-		//FFT.show(magnitude, "magnitude = frequencyResponse.forEach() --> abs()");
+//		FFT.show(magnitude, "magnitude = frequencyResponse.forEach() --> abs()");
 	}
 
 	private double[] computeMagnitude(Complex[] x){

@@ -2,7 +2,9 @@ package edu.tcnj.ulb;
 
 import java.io.IOException;
 
+import edu.tcnj.ulb.daq.DataParser;
 import edu.tcnj.ulb.daq.Recording;
+import edu.tcnj.ulb.dsp.DataProcessor;
 import edu.tcnj.ulb.ui.Menu;
 import edu.tcnj.ulb.ui.Prompt;
 
@@ -13,8 +15,6 @@ public class Main {
 	public static final int CHUNK_SIZE = 1000;
 	public static final int NUM_CHANNELS = 9;
 	
-	private static final int FILE_SIZE = BYTES_PER_SECOND * 10; // ~10 secs of data
-
 	public static void main(String[] args) throws Exception {
 		Menu mainMenu = new Menu("TCNJ Underwater Beacon Locator");
 		mainMenu.addSelection("Record live data from hydrophone array", Main::recordLiveData);
@@ -29,7 +29,7 @@ public class Main {
 		recording.start();
 		
 		try {
-			Thread.sleep(60000);
+			Thread.sleep(60000); // Record for a minute
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -51,21 +51,15 @@ public class Main {
 			Recording recording = Recording.load(path);
 			System.out.printf("Timestamp: %s%n", recording.getMetaData().getTimestamp());
 			System.out.printf("Filenames: %s%n", recording.getMetaData().getFilenames());
+			System.out.printf("File size: %d%n", recording.getMetaData().fileSize());
+			System.out.printf("Stop position: %d%n", recording.getMetaData().getStopPosition());
+			DataParser parser = new DataParser(recording, NUM_CHANNELS, CHUNK_SIZE);
+			DataProcessor processor = new DataProcessor(parser);
+			processor.process();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-//		try (RandomAccessFile file = new RandomAccessFile(path, "r")) {
-//			MappedByteBuffer fileBuffer = file.getChannel().map(MapMode.READ_ONLY, 0, file.length());
-//			DataParser parser = new DataParser(fileBuffer, NUM_CHANNELS, CHUNK_SIZE);
-//			DataProcessor processor = new DataProcessor(parser);
-//			processor.process();
-//		} catch (FileNotFoundException e) {
-//			System.out.printf("The specified file could not be found: %s\n", e.getMessage());
-//		} catch (IOException e) {
-//			System.out.printf("Unable to open the file: %s\n", e.getMessage());
-//		}
 	}
 	
 	private static void recordAndProcess() {

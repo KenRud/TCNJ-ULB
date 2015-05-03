@@ -1,39 +1,30 @@
 package edu.tcnj.ulb.daq;
 
-import java.nio.ByteBuffer;
 
 public class DataParser {
 	private final int numChannels;
 	private final int chunkSize;
 	private final int chunkSeparation;
 
-	private ByteBuffer buffer;
-	private ArduinoReader arduinoReader;
+	private final Recording recording;
 	
-	public DataParser(ByteBuffer buffer, int numChannels, int chunkSize) {
-		this.buffer = buffer;
+	public DataParser(Recording recording, int numChannels, int chunkSize) {
+		this.recording = recording;
 		this.numChannels = numChannels;
 		this.chunkSize = chunkSize;
 		chunkSeparation = numChannels * chunkSize;
 	}
 	
-	public DataParser(ArduinoReader reader, int numChannels, int chunkSize) {
-		arduinoReader = reader;
-		buffer = reader.getUpdatedReadBuffer();
-		this.numChannels = numChannels;
-		this.chunkSize = chunkSize;
-		chunkSeparation = numChannels * chunkSize;
-	}
+//	public DataParser(ArduinoReader reader, int numChannels, int chunkSize) {
+//		arduinoReader = reader;
+//		buffer = reader.getUpdatedReadBuffer();
+//		this.numChannels = numChannels;
+//		this.chunkSize = chunkSize;
+//		chunkSeparation = numChannels * chunkSize;
+//	}
 	
-	public int size() {
-		if (arduinoReader != null) {
-			buffer = arduinoReader.getUpdatedReadBuffer();
-		}
-		return buffer.capacity();
-	}
-	
-	public int channelSize() {
-		return size() / numChannels;
+	public long channelSize() {
+		return recording.size() / numChannels;
 	}
 	
 	public int numChannels() {
@@ -50,9 +41,6 @@ public class DataParser {
 					"Cannot get channel %d. Channels range from 0 to %d.",
 					channel, numChannels - 1));
 		}
-		if (arduinoReader != null) {
-			return new LiveParsedChannel(channel);
-		}
 		return new ParsedChannel(channel);
 	}
 	
@@ -65,10 +53,10 @@ public class DataParser {
 		
 		public short get(int index) {
 			int bufferIndex = getBufferIndex(index);
-			if (bufferIndex < 0 || bufferIndex >= buffer.limit()) {
+			if (!recording.isValid(bufferIndex)) {
 				throw new IndexOutOfBoundsException();
 			}
-			return buffer.getShort(bufferIndex);
+			return recording.get(bufferIndex);
 		}
 		
 		public short[] get(int start, int length) {
@@ -85,40 +73,40 @@ public class DataParser {
 		}
 	}
 	
-	private class LiveParsedChannel extends ParsedChannel {
-
-		public LiveParsedChannel(int channel) {
-			super(channel);
-		}
-		
-		@Override
-		public short get(int index) {
-			int bufferIndex = getBufferIndex(index);
-			if (bufferIndex > buffer.limit()) {
-				try {
-					arduinoReader.waitForAvailable(bufferIndex);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				buffer = arduinoReader.getUpdatedReadBuffer();
-			}
-			return super.get(index);
-		}
-		
-		@Override
-		public short[] get(int start, int length) {
-			int bufferIndex = getBufferIndex(start + length);
-			if (bufferIndex > buffer.limit()) {
-				try {
-					arduinoReader.waitForAvailable(bufferIndex);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				buffer = arduinoReader.getUpdatedReadBuffer();
-			}
-			return super.get(start, length);
-		}
-	}
+//	private class LiveParsedChannel extends ParsedChannel {
+//
+//		public LiveParsedChannel(int channel) {
+//			super(channel);
+//		}
+//		
+//		@Override
+//		public short get(int index) {
+//			int bufferIndex = getBufferIndex(index);
+//			if (bufferIndex > buffer.limit()) {
+//				try {
+//					arduinoReader.waitForAvailable(bufferIndex);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				buffer = arduinoReader.getUpdatedReadBuffer();
+//			}
+//			return super.get(index);
+//		}
+//		
+//		@Override
+//		public short[] get(int start, int length) {
+//			int bufferIndex = getBufferIndex(start + length);
+//			if (bufferIndex > buffer.limit()) {
+//				try {
+//					arduinoReader.waitForAvailable(bufferIndex);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				buffer = arduinoReader.getUpdatedReadBuffer();
+//			}
+//			return super.get(start, length);
+//		}
+//	}
 }
