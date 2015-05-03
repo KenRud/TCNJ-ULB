@@ -39,7 +39,7 @@ public class DataProcessor {
 
 	private short[][] assembleWindow(int index, int length){
 		short[][] chunkWindow = new short[parser.numChannels()][];
-		int x = 1; // TODO @Joe, is this "x" being used for anything?
+
 		for(int i = 0; i < parser.numChannels(); i++){
 			short[] channelData = parser.getChannel(i).get(index, length);
 			chunkWindow[i] = channelData;

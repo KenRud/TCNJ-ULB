@@ -5,10 +5,13 @@ import java.io.File;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.stage.FileChooser;
+import javafx.scene.chart.LineChart;
+import edu.tcnj.ulb.dsp.DataProcessor;
 
 public class MainController {
 	@FXML private Button loadButton;
 	@FXML private Button recordButton;
+	@FXML private LineChart searchSignal;
 	
 	private MainApp mainApp;
 	
