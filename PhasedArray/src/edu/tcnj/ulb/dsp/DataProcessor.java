@@ -1,6 +1,7 @@
 package edu.tcnj.ulb.dsp;
 
 import edu.tcnj.ulb.daq.DataParser;
+import edu.tcnj.ulb.application.MainController;
 
 public class DataProcessor {
 	private static final int WINDOW_SIZE = 512;
@@ -39,7 +40,7 @@ public class DataProcessor {
 
 	private short[][] assembleWindow(int index, int length){
 		short[][] chunkWindow = new short[parser.numChannels()][];
-		int x = 1; // TODO @Joe, is this "x" being used for anything?
+
 		for(int i = 0; i < parser.numChannels(); i++){
 			short[] channelData = parser.getChannel(i).get(index, length);
 			chunkWindow[i] = channelData;
@@ -74,13 +75,6 @@ public class DataProcessor {
 		//System.out.println("Resolution: " + FFT.calculateResolution(magnitude, 20000));
 		int[] points = desiredElements(FFT.calculateResolution(magnitude, 20000));
 
-		for(int i = 0; i < points.length; i++){
-			//System.out.println("I" + i + "  " + points[i]);
-		}
-		// TEST TRANSMITTER SIGNAL
-//		for(int i = 0; i < SEARCH_SIGNAL.length; i++){
-//			System.out.println(i + " : " + SEARCH_SIGNAL[i]);
-//		}
 		//Correlation.xcorr(magnitude);
 		boolean isMatch = matchDetectionFFT(points, magnitude);
 		if(isMatch){
