@@ -33,17 +33,17 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <LineChart fx:id="searchSignal">
+            <LineChart id="searchSignal" fx:id="searchSignal" alternativeColumnFillVisible="true" createSymbols="false">
               <xAxis>
-                <CategoryAxis side="BOTTOM" />
+                <NumberAxis side="BOTTOM" />
               </xAxis>
               <yAxis>
                 <NumberAxis side="LEFT" />
               </yAxis>
             </LineChart>
-            <LineChart GridPane.columnIndex="1">
+            <LineChart id="frequencyResponse" createSymbols="false" GridPane.columnIndex="1">
               <xAxis>
-                <CategoryAxis side="BOTTOM" />
+                <NumberAxis side="BOTTOM" />
               </xAxis>
               <yAxis>
                 <NumberAxis side="LEFT" />
