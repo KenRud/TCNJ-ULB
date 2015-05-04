@@ -7,10 +7,10 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.Paths;
 import java.util.List;
 
+import edu.tcnj.ulb.Configuration;
+
 public class Recording {
-	public static final int BYTES_PER_SECOND = 360000;
-	public static final int BYTES_PER_MINUTE = BYTES_PER_SECOND * 60;
-	public static final int DEFUALT_FILE_SIZE = BYTES_PER_MINUTE * 10;
+	public static final int DEFUALT_FILE_SIZE = Configuration.BYTES_PER_MINUTE * 5;
 	
 	private final String path;
 	private RecordingMetaData metaData;

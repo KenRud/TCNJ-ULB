@@ -22,7 +22,7 @@ public class MainController {
 	@FXML private LineChart<Double, Double> searchSignal;
 	@FXML private LineChart<Double, Double> frequencyResponse;
 	
-	private final ExecutorService executorService = Executors.newFixedThreadPool(10);
+	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 	private MainApp mainApp;
 	
 	@FXML

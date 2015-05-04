@@ -19,7 +19,7 @@ public class Main {
 	
 	private static void recordLiveData() {
 		String path = Prompt.getString("Recording destination");
-		Recording recording = Recording.create(path, Recording.BYTES_PER_SECOND * 10);
+		Recording recording = Recording.create(path, Configuration.BYTES_PER_SECOND * 10);
 		recording.start();
 		
 		try {

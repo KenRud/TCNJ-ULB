@@ -21,8 +21,8 @@ import mikera.vectorz.Vector3;
  *
  */
 public class PhasedArray {
-	private static final double NODE_SEPARATION = 2;
-	private static final double SPEED_OF_SOUND = 1500;
+	private static final double NODE_SEPARATION = 0.25; // meters
+	private static final double SPEED_OF_SOUND = 1500; // meters/second
 	private static final Vector3[] NODES = new Vector3[9];
 	
 	private int[] delays;
