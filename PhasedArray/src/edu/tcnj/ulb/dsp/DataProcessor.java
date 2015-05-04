@@ -1,7 +1,7 @@
 package edu.tcnj.ulb.dsp;
 
-import edu.tcnj.ulb.daq.DataParser;
 import edu.tcnj.ulb.application.MainController;
+import edu.tcnj.ulb.daq.DataParser;
 
 public class DataProcessor {
 	private static final int WINDOW_SIZE = 512;
@@ -13,6 +13,7 @@ public class DataProcessor {
 	public static double[] SEARCH_SIGNAL = new double[WINDOW_SIZE];
 
 	private final DataParser parser;
+	private MainController controller;
 
 	static{
 		// Amplitude needs to be determined
@@ -26,6 +27,13 @@ public class DataProcessor {
 
 	public DataProcessor(DataParser parser) {
 		this.parser = parser;
+	}
+
+	public DataProcessor(DataParser parser, MainController controller){
+
+		this.parser = parser;
+		this.controller = controller;
+
 	}
 
 	public void process() {
@@ -50,14 +58,23 @@ public class DataProcessor {
 	
 	private void processAllAngles(short[][] window) {
 		for (double theta = 0; theta < 360; theta += THETA_INCREMENT) {
-			for (double phi = 0; phi < 90; phi += PHI_INCREMENT) {
+			for (double phi = 0; phi < 45; phi += PHI_INCREMENT) {
 				PhasedArray array = new PhasedArray(phi, theta, window);
 				int[] combinedSignal = array.combineChannels();
 				computeFFT(combinedSignal);
+				computeXCorr(combinedSignal);
 			}
 		}
 	}
+	private void computeXCorr(int[] timeDelayedSignal){
+		double[] signal = copyFromIntArray(timeDelayedSignal);
+		double[] crossCorrelation = Correlation.xcorr(signal, SEARCH_SIGNAL);
 
+		for (int i = 0; i < crossCorrelation.length; i++) {
+			System.out.println(i + " : " + crossCorrelation[i]);
+		}
+		System.out.println("signal Length :" + signal.length);
+	}
 	private void computeFFT(int[] timeDelayedSignal){
 		Complex[] complexSignal = new Complex[WINDOW_SIZE];
 		Complex temp;
@@ -67,21 +84,18 @@ public class DataProcessor {
 			temp = new Complex(timeDelayedSignal[i], 0);
 			complexSignal[i] = temp;
 		}
-		// TODO: get rid of all my test and printing bullshit
+
 		Complex[] frequencyResponse = FFT.fft(complexSignal);
 		double[] magnitude = computeMagnitude(frequencyResponse);
-		
-		//System.out.println(magnitude.length);
-		//System.out.println("Resolution: " + FFT.calculateResolution(magnitude, 20000));
+		//controller.updateFFTGraph(magnitude);
+
+
 		int[] points = desiredElements(FFT.calculateResolution(magnitude, 20000));
 
-		//Correlation.xcorr(magnitude);
 		boolean isMatch = matchDetectionFFT(points, magnitude);
 		if(isMatch){
 			//System.out.println("Is Match " + isMatch);
 		}
-		//FFT.show(frequencyResponse, "frequencyResponse = fft(complexSignal)");
-//		FFT.show(magnitude, "magnitude = frequencyResponse.forEach() --> abs()");
 	}
 
 	private double[] computeMagnitude(Complex[] x){
@@ -130,4 +144,13 @@ public class DataProcessor {
 		return matchFound;
 
 	}
+
+	public static double[] copyFromIntArray(int[] source) {
+		double[] dest = new double[source.length];
+		for(int i=0; i<source.length; i++) {
+			dest[i] = source[i];
+		}
+		return dest;
+	}
+
 }

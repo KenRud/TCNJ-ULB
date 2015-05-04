@@ -3,6 +3,8 @@
 .project
 .settings/
 .metadata
+.idea
+*.iml
 
 # Mac
 .DS_Store

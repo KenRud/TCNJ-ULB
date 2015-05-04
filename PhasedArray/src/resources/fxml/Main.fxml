@@ -41,7 +41,7 @@
                 <NumberAxis side="LEFT" />
               </yAxis>
             </LineChart>
-            <LineChart id="frequencyResponse" createSymbols="false" GridPane.columnIndex="1">
+            <LineChart id="frequencyResponse" fx:id="frequencyResponse" createSymbols="false" GridPane.columnIndex="1">
               <xAxis>
                 <NumberAxis side="BOTTOM" />
               </xAxis>
