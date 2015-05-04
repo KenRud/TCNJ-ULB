@@ -1,8 +1,8 @@
 package edu.tcnj.ulb.dsp;
 
-import static edu.tcnj.ulb.dsp.DataProcessor.SAMPLE_FREQUENCY;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
+import edu.tcnj.ulb.Configuration;
 import mikera.vectorz.Vector3;
 
 /**
@@ -74,7 +74,7 @@ public class PhasedArray {
 			Vector3 phasedNode = NODES[i].copy();
 			// TODO Find out what the "distance" parameter means in Vector#projectToPlane()
 			phasedNode.projectToPlane(plane, 0);
-			delays[i] = (int) (SAMPLE_FREQUENCY * phasedNode.getZ() / SPEED_OF_SOUND);
+			delays[i] = (int) (Configuration.SAMPLE_FREQUENCY * phasedNode.getZ() / SPEED_OF_SOUND);
 		}
 	}
 

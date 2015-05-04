@@ -42,7 +42,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>edu.tcnj.ulb.Main</mainClass>
+					<mainClass>edu.tcnj.ulb.cli.Main</mainClass>
 				</configuration>
 			</plugin>
 			
