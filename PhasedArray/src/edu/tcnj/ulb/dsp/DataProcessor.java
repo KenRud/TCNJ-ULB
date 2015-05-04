@@ -74,9 +74,10 @@ public class DataProcessor {
 		double[] crossCorrelation = Correlation.xcorr(signal, SEARCH_SIGNAL);
 
 		for (int i = 0; i < crossCorrelation.length; i++) {
-			System.out.println(i + " : " + crossCorrelation[i]);
+			//System.out.println(i + " : " + crossCorrelation[i]);
 		}
-		System.out.println("signal Length :" + signal.length);
+		boolean isMatch = matchDetectionXCorr(crossCorrelation);
+		System.out.println("signal Length :" + signal.length + "isMatch" + isMatch);
 	}
 	
 	private void computeFFT(int[] timeDelayedSignal){
@@ -93,7 +94,8 @@ public class DataProcessor {
 		double[] magnitude = computeMagnitude(frequencyResponse);
 		//controller.updateFFTGraph(magnitude);
 
-		int[] points = desiredElements(FFT.calculateResolution(magnitude, 20000));
+		int[] points = desiredElementsFFT(FFT.calculateResolution(magnitude,
+				Configuration.SAMPLE_FREQUENCY));
 
 		boolean isMatch = matchDetectionFFT(points, magnitude);
 		if(isMatch){
@@ -110,7 +112,7 @@ public class DataProcessor {
 		return magnitudeValues;
 	}
 
-	private int[] desiredElements(double resolution){
+	private int[] desiredElementsFFT(double resolution){
 		int[] indices = new int[5];
 		indices[2] = Configuration.TRANSMITTER_FREQUENCY / (int) resolution;
 
@@ -144,6 +146,32 @@ public class DataProcessor {
 		}
 		return matchFound;
 	}
+	
+	private boolean matchDetectionXCorr(double[] xCorr){
+		double averageMagnitude = 0;
+		boolean match;
+		for (int i = 0; i < xCorr.length; i++) {
+			averageMagnitude += xCorr[i];
+		}
+		averageMagnitude = averageMagnitude / xCorr.length;
+
+		int center = xCorr.length / 2;
+		int peak = 0;
+		for (int i = (center - 3); i <= (center + 3); i++) {
+			peak += xCorr[i];
+		}
+
+		peak = peak / 7;
+		System.out.println("Peak " + peak);
+		System.out.println("Average " + averageMagnitude);
+		if(peak > averageMagnitude * 1.5){
+			match = true;
+		} else {
+			match = false;
+		}
+
+		return match;
+	}
 
 	public static double[] copyFromIntArray(int[] source) {
 		double[] dest = new double[source.length];
@@ -152,5 +180,4 @@ public class DataProcessor {
 		}
 		return dest;
 	}
-
 }

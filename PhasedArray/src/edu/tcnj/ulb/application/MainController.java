@@ -54,7 +54,6 @@ public class MainController {
 	}
 
 	private void createSearchSignalGraph(){
-
 		searchSignal.setTitle("Search Signal");
 
 		XYChart.Series<Double, Double> series = new XYChart.Series<>();
@@ -70,7 +69,6 @@ public class MainController {
 	}
 
 	public void updateFFTGraph(double[] fftPoints){
-
 		frequencyResponse.setTitle("Frequency Response");
 		frequencyResponse.getXAxis().setAutoRanging(true);
 		frequencyResponse.getYAxis().setAutoRanging(true);
@@ -83,5 +81,4 @@ public class MainController {
 
 		frequencyResponse.getData().add(series);
 	}
-
 }
