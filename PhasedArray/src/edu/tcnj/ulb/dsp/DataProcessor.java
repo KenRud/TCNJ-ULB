@@ -15,12 +15,10 @@ public class DataProcessor {
 	private final DataParser parser;
 	private MainController controller;
 
-	static{
-		// Amplitude needs to be determined
+	static{		
 		double amplitude = 1.0;
 		for(int sample = 0; sample < WINDOW_SIZE; sample++){
 			double time = (double) sample / SAMPLE_FREQUENCY;
-			// TODO: TEST THIS!
 			SEARCH_SIGNAL[sample] = amplitude * Math.sin(2 * Math.PI * TRANSMITTER_FREQUENCY * time);
 		}
 	}
@@ -66,16 +64,14 @@ public class DataProcessor {
 			}
 		}
 	}
+	
 	private void computeXCorr(int[] timeDelayedSignal){
 		double[] signal = copyFromIntArray(timeDelayedSignal);
 		double[] crossCorrelation = Correlation.xcorr(signal, SEARCH_SIGNAL);
-
-		for (int i = 0; i < crossCorrelation.length; i++) {
-			//System.out.println(i + " : " + crossCorrelation[i]);
-		}
+		// Check for peak in cross correlation output
 		boolean isMatch = matchDetectionXCorr(crossCorrelation);
-		System.out.println("signal Length :" + signal.length + "isMatch" + isMatch);
 	}
+
 	private void computeFFT(int[] timeDelayedSignal){
 		Complex[] complexSignal = new Complex[WINDOW_SIZE];
 		Complex temp;
