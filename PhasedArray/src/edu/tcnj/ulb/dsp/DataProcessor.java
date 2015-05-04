@@ -1,52 +1,64 @@
 package edu.tcnj.ulb.dsp;
 
+import edu.tcnj.ulb.Configuration;
 import edu.tcnj.ulb.application.MainController;
 import edu.tcnj.ulb.daq.DataParser;
 
 public class DataProcessor {
 	private static final int WINDOW_SIZE = 512;
-	private static final int TRANSMITTER_FREQUENCY = 6300;
 	private static final double THETA_INCREMENT = 45;
 	private static final double PHI_INCREMENT = 45;
 	
-	public static final int SAMPLE_FREQUENCY = 20000;
 	public static double[] SEARCH_SIGNAL = new double[WINDOW_SIZE];
 
 	private final DataParser parser;
-	private MainController controller;
+	private int windowIndex;
 
+<<<<<<< HEAD
 	static{		
 		double amplitude = 1.0;
 		for(int sample = 0; sample < WINDOW_SIZE; sample++){
 			double time = (double) sample / SAMPLE_FREQUENCY;
 			SEARCH_SIGNAL[sample] = amplitude * Math.sin(2 * Math.PI * TRANSMITTER_FREQUENCY * time);
+=======
+	static {
+		// Amplitude needs to be determined
+		double amplitude = 1.0;
+		for(int sample = 0; sample < WINDOW_SIZE; sample++){
+			double time = (double) sample / Configuration.SAMPLE_FREQUENCY;
+			// TODO: TEST THIS!
+			SEARCH_SIGNAL[sample] = amplitude
+					* Math.sin(2 * Math.PI * Configuration.TRANSMITTER_FREQUENCY * time);
+>>>>>>> origin/master
 		}
 	}
 
 	public DataProcessor(DataParser parser) {
 		this.parser = parser;
 	}
-
+	
 	public DataProcessor(DataParser parser, MainController controller){
-
 		this.parser = parser;
-		this.controller = controller;
-
+	}
+	
+	public boolean hasNextWindow() {
+		return windowIndex + WINDOW_SIZE < parser.channelSize();
+	}
+	
+	public void processNextWindow() {
+		short[][] window = assembleWindow(windowIndex, WINDOW_SIZE);
+		processAllAngles(window);
+		windowIndex += WINDOW_SIZE;
 	}
 
-	public void process() {
-		// TODO Check if this is the correct logic for looping
-		// Currently it is set to loop through all windows, sliding the window over the entire 
-		// length of a single window.
-		for(int idx = 0; idx < parser.channelSize(); idx += WINDOW_SIZE) {
-			short[][] window = assembleWindow(idx, WINDOW_SIZE);
-			processAllAngles(window);
+	public void processAll() {
+		while(hasNextWindow()) {
+			processNextWindow();
 		}
 	}
 
 	private short[][] assembleWindow(int index, int length){
 		short[][] chunkWindow = new short[parser.numChannels()][];
-
 		for(int i = 0; i < parser.numChannels(); i++){
 			short[] channelData = parser.getChannel(i).get(index, length);
 			chunkWindow[i] = channelData;
@@ -71,7 +83,11 @@ public class DataProcessor {
 		// Check for peak in cross correlation output
 		boolean isMatch = matchDetectionXCorr(crossCorrelation);
 	}
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> origin/master
 	private void computeFFT(int[] timeDelayedSignal){
 		Complex[] complexSignal = new Complex[WINDOW_SIZE];
 		Complex temp;
@@ -86,8 +102,8 @@ public class DataProcessor {
 		double[] magnitude = computeMagnitude(frequencyResponse);
 		//controller.updateFFTGraph(magnitude);
 
-
-		int[] points = desiredElementsFFT(FFT.calculateResolution(magnitude, 20000));
+		int[] points = desiredElementsFFT(FFT.calculateResolution(magnitude,
+				Configuration.SAMPLE_FREQUENCY));
 
 		boolean isMatch = matchDetectionFFT(points, magnitude);
 		if(isMatch){
@@ -106,7 +122,7 @@ public class DataProcessor {
 
 	private int[] desiredElementsFFT(double resolution){
 		int[] indices = new int[5];
-		indices[2] = TRANSMITTER_FREQUENCY / (int) resolution;
+		indices[2] = Configuration.TRANSMITTER_FREQUENCY / (int) resolution;
 
 		for(int i = 0; i < 5; i++){
 			if(i !=2){
@@ -117,11 +133,10 @@ public class DataProcessor {
 				}
 			}
 		}
-		
 		return indices;
 	}
+	
 	private boolean matchDetectionFFT(int[] indices, double[] magnitude){
-
 		boolean matchFound= false;
 		double averagePower = 0;
 		for (int i = 0; i < magnitude.length; i++){
@@ -137,9 +152,7 @@ public class DataProcessor {
 				matchFound = true;
 			}
 		}
-
 		return matchFound;
-
 	}
 	
 	private boolean matchDetectionXCorr(double[] xCorr){
@@ -175,5 +188,4 @@ public class DataProcessor {
 		}
 		return dest;
 	}
-
 }

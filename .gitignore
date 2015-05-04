@@ -3,6 +3,8 @@
 .project
 .settings/
 .metadata
+
+# IntelliJ
 .idea
 *.iml
 
@@ -13,6 +15,9 @@
 log/
 target/
 bin/
+
+# Logs
+*.log
 
 # Temporary files
 *~

@@ -1,4 +1,4 @@
-package edu.tcnj.ulb.ui;
+package edu.tcnj.ulb.cli;
 
 import java.util.List;
 import java.util.Scanner;

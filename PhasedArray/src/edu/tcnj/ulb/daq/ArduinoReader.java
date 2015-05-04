@@ -42,7 +42,6 @@ public class ArduinoReader implements SerialPortEventListener, Closeable {
 	private volatile int waitPosition;
 	private volatile int bufferPosition;
 	
-	private RandomAccessFile file;
 	private MappedByteBuffer fileBuffer;
 	
 	public ArduinoReader(String path, int fileSize, Consumer<String> listener) {
@@ -125,16 +124,9 @@ public class ArduinoReader implements SerialPortEventListener, Closeable {
 	private void openNewFile() {
 		String filename = UUID.randomUUID().toString();
 		String filepath = Paths.get(path, filename).toString();
-		try {
-			// Close the currently opened file
-			if (file != null) {
-				file.close();
-			}
-
+		try (RandomAccessFile file = new RandomAccessFile(filepath, "rw")) {
 			// Attempt to open a new memory-mapped file
-			file = new RandomAccessFile(filepath, "rw");
 			fileBuffer = file.getChannel().map(MapMode.READ_WRITE, 0, fileSize);
-			
 			// Provide the new file name to the listener
 			if (newFileListener != null) {
 				newFileListener.accept(filename);
@@ -172,11 +164,7 @@ public class ArduinoReader implements SerialPortEventListener, Closeable {
 		if (port != null && port.isOpened()) {
 			try {
 				port.closePort();
-				file.close();
 			} catch (SerialPortException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

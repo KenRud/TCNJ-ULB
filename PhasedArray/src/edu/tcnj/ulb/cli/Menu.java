@@ -1,4 +1,4 @@
-package edu.tcnj.ulb.ui;
+package edu.tcnj.ulb.cli;
 
 import java.util.ArrayList;
 import java.util.List;

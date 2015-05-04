@@ -26,8 +26,8 @@ void loop() {
 void handler() {
   // Sample each of the analog inputs
   for (int chan = 0; chan < 9; chan++) {
-//    int val = analogRead(chan);
-    int val = 'a' + chan;
+    int val = analogRead(chan);
+//    int val = 'a' + chan;
     current_buffer[idx + chan * CHANNEL_BUFFER_SIZE] = (byte) ((val >> 8) & 0xff);
     current_buffer[idx + 1 + chan * CHANNEL_BUFFER_SIZE] = (byte) (val & 0xff);
   }
