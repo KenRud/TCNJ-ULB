@@ -97,7 +97,7 @@ public class Recording {
 			try (RandomAccessFile file = new RandomAccessFile(filepath, "r")) {
 				int length;
 				if (fileIndex == filenames.size() - 1) {
-					length = metaData.getStopPosition();
+					length = metaData.getStopPosition() - 1;
 				} else {
 					length = (int) file.length();
 				}
