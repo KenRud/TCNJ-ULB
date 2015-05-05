@@ -51,15 +51,15 @@ public class DataParser {
 			channelOffset = channel * chunkSize;
 		}
 		
-		public short get(int index) {
-			int bufferIndex = getBufferIndex(index);
+		public short get(long index) {
+			long bufferIndex = getBufferIndex(index);
 			if (!recording.isValid(bufferIndex)) {
 				throw new IndexOutOfBoundsException();
 			}
 			return recording.get(bufferIndex);
 		}
 		
-		public short[] get(int start, int length) {
+		public short[] get(long start, int length) {
 			short[] data = new short[length];
 			// TODO Determine if this is as fast as a bulk ByteBuffer.get
 			for (int i = 0; i < length; i++) {
@@ -68,7 +68,7 @@ public class DataParser {
 			return data;
 		}
 		
-		protected int getBufferIndex(int index) {
+		protected long getBufferIndex(long index) {
 			return index + channelOffset + chunkSeparation * index / chunkSize;
 		}
 	}

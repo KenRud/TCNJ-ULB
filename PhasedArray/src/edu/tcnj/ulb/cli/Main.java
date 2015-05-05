@@ -3,7 +3,6 @@ package edu.tcnj.ulb.cli;
 import java.io.IOException;
 
 import edu.tcnj.ulb.Configuration;
-import edu.tcnj.ulb.daq.DataParser;
 import edu.tcnj.ulb.daq.Recording;
 import edu.tcnj.ulb.dsp.DataProcessor;
 
@@ -47,9 +46,7 @@ public class Main {
 			System.out.printf("Filenames: %s%n", recording.getMetaData().getFilenames());
 			System.out.printf("File size: %d%n", recording.getMetaData().fileSize());
 			System.out.printf("Stop position: %d%n", recording.getMetaData().getStopPosition());
-			DataParser parser = new DataParser(recording, Configuration.NUM_CHANNELS, 
-					Configuration.CHUNK_SIZE);
-			DataProcessor processor = new DataProcessor(parser);
+			DataProcessor processor = new DataProcessor(recording);
 			processor.processAll();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

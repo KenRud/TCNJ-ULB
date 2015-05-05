@@ -1,18 +1,28 @@
 package edu.tcnj.ulb.dsp;
 
+import java.time.Instant;
+
 import edu.tcnj.ulb.Configuration;
-import edu.tcnj.ulb.application.MainController;
+import edu.tcnj.ulb.application.ProcessingResults;
 import edu.tcnj.ulb.daq.DataParser;
+import edu.tcnj.ulb.daq.Recording;
 
 public class DataProcessor {
 	private static final int WINDOW_SIZE = 512;
 	private static final double THETA_INCREMENT = 45;
 	private static final double PHI_INCREMENT = 45;
+	private static final int[] EMPTY_SIGNAL = new int[0];
 	
 	public static double[] SEARCH_SIGNAL = new double[WINDOW_SIZE];
 
+	private final Recording recording;
+	private final ProcessingResults results;
 	private final DataParser parser;
-	private int windowIndex;
+	private long windowIndex;
+	
+	// Used for displaying the best matching signal
+	private int[] bestMatchSignal;
+	private double maxMatchMagnitude;
 
 	static {
 		// Amplitude needs to be determined
@@ -25,12 +35,11 @@ public class DataProcessor {
 		}
 	}
 
-	public DataProcessor(DataParser parser) {
-		this.parser = parser;
-	}
-	
-	public DataProcessor(DataParser parser, MainController controller){
-		this.parser = parser;
+	public DataProcessor(Recording recording) {
+		this.recording = recording;
+		this.results = new ProcessingResults(Configuration.SAMPLE_FREQUENCY);
+		this.parser = new DataParser(recording, Configuration.NUM_CHANNELS,
+				Configuration.NUM_CHANNELS);
 	}
 	
 	public boolean hasNextWindow() {
@@ -39,8 +48,20 @@ public class DataProcessor {
 	
 	public void processNextWindow() {
 		short[][] window = assembleWindow(windowIndex, WINDOW_SIZE);
+		resetBestMatch();
 		processAllAngles(window);
+		results.setBestMatchSignal(calculateTime(windowIndex), bestMatchSignal);
 		windowIndex += WINDOW_SIZE;
+	}
+
+	private void resetBestMatch() {
+		bestMatchSignal = EMPTY_SIGNAL;
+		maxMatchMagnitude = 0;
+	}
+
+	private Instant calculateTime(long windowIndex) {
+		return recording.getMetaData().getTimestamp()
+				.plusSeconds(windowIndex / Configuration.SAMPLE_FREQUENCY);
 	}
 
 	public void processAll() {
@@ -48,8 +69,12 @@ public class DataProcessor {
 			processNextWindow();
 		}
 	}
+	
+	public ProcessingResults getResults() {
+		return results;
+	}
 
-	private short[][] assembleWindow(int index, int length){
+	private short[][] assembleWindow(long index, int length){
 		short[][] chunkWindow = new short[parser.numChannels()][];
 		for(int i = 0; i < parser.numChannels(); i++){
 			short[] channelData = parser.getChannel(i).get(index, length);
@@ -57,19 +82,36 @@ public class DataProcessor {
 		}
 		return chunkWindow;
 	}
-	
+
 	private void processAllAngles(short[][] window) {
 		for (double theta = 0; theta < 360; theta += THETA_INCREMENT) {
 			for (double phi = 0; phi < 45; phi += PHI_INCREMENT) {
 				PhasedArray array = new PhasedArray(phi, theta, window);
 				int[] combinedSignal = array.combineChannels();
-				computeFFT(combinedSignal);
+				double[] fft = computeFFT(combinedSignal);
 				computeXCorr(combinedSignal);
+				
+				// TODO Refactor!
+				// Grabbing the signal with the best match
+				double max = selectMaxMagnitude(fft);
+				if (max > maxMatchMagnitude) {
+					maxMatchMagnitude = max;
+					bestMatchSignal = combinedSignal;
+				}
 			}
 		}
 	}
 	
-	private void computeXCorr(int[] timeDelayedSignal){
+	private double selectMaxMagnitude(double[] magnitude) {
+		int[] elements = desiredElementsFFT(magnitude);
+		double max = 0;
+		for (int j = 0; j < elements.length; j++) {
+			max = Math.max(max, magnitude[elements[j]]);
+		}
+		return max;
+	}
+	
+	private void computeXCorr(int[] timeDelayedSignal) {
 		double[] signal = copyFromIntArray(timeDelayedSignal);
 		double[] crossCorrelation = Correlation.xcorr(signal, SEARCH_SIGNAL);
 
@@ -80,7 +122,7 @@ public class DataProcessor {
 		System.out.println("signal Length :" + signal.length + "isMatch" + isMatch);
 	}
 	
-	private void computeFFT(int[] timeDelayedSignal){
+	private double[] computeFFT(int[] timeDelayedSignal) {
 		Complex[] complexSignal = new Complex[WINDOW_SIZE];
 		Complex temp;
 
@@ -92,17 +134,17 @@ public class DataProcessor {
 
 		Complex[] frequencyResponse = FFT.fft(complexSignal);
 		double[] magnitude = computeMagnitude(frequencyResponse);
-		//controller.updateFFTGraph(magnitude);
 
-		int[] points = desiredElementsFFT(FFT.calculateResolution(magnitude,
-				Configuration.SAMPLE_FREQUENCY));
+		int[] points = desiredElementsFFT(magnitude);
 
 		boolean isMatch = matchDetectionFFT(points, magnitude);
 		if(isMatch){
 			//System.out.println("Is Match " + isMatch);
 		}
-	}
 
+		return magnitude;
+	}
+	
 	private double[] computeMagnitude(Complex[] x){
 		double[] magnitudeValues = new double[x.length];
 
@@ -112,7 +154,9 @@ public class DataProcessor {
 		return magnitudeValues;
 	}
 
-	private int[] desiredElementsFFT(double resolution){
+	private int[] desiredElementsFFT(double[] magnitude){
+		double resolution = FFT.calculateResolution(magnitude,
+				Configuration.SAMPLE_FREQUENCY);
 		int[] indices = new int[5];
 		indices[2] = Configuration.TRANSMITTER_FREQUENCY / (int) resolution;
 
