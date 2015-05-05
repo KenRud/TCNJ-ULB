@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyListProperty;
@@ -12,7 +13,11 @@ import javafx.collections.FXCollections;
 import javafx.scene.chart.XYChart.Data;
 
 public class ProcessingResults {
+	private static final int RENDER_QUEUE_SIZE = 2;
+
 	private final int samplingFrequency;
+	private final Object renderSync = new Object();
+	private volatile int renderCount;
 	
 	private final ReadOnlyListWrapper<Data<Integer, Integer>> matchSignal =
 			new ReadOnlyListWrapper<>(this, "matchSignal", FXCollections.observableArrayList());
@@ -55,10 +60,25 @@ public class ProcessingResults {
 
 	}
 	
-	public void render() {
-		Platform.runLater(()-> {
-			matchSignal.get().setAll(outgoingMatchSignal);
-			fftSignal.get().setAll(outgoingFFTSignal);
-		});
+	public void render() throws InterruptedException {
+		synchronized (renderSync) {
+			renderCount++;
+			
+			Platform.runLater(()-> {
+				synchronized (renderSync) {
+					renderCount--;
+					
+					matchSignal.get().setAll(outgoingMatchSignal);
+					fftSignal.get().setAll(outgoingFFTSignal);
+					
+					renderSync.notifyAll();
+				}
+			});
+			
+			// Wait for render to complete
+			while (renderCount >= RENDER_QUEUE_SIZE) {
+				renderSync.wait();
+			}
+		}
 	}
 }
