@@ -29,7 +29,7 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                <children>
-                  <LineChart fx:id="searchSignal" createSymbols="false" layoutX="168.0" layoutY="-9.0" prefHeight="400.0" prefWidth="781.0">
+                  <LineChart fx:id="searchSignal" createSymbols="false" layoutX="105.0" layoutY="4.0" prefHeight="400.0" prefWidth="781.0">
                     <xAxis>
                       <NumberAxis side="BOTTOM" />
                     </xAxis>
@@ -42,25 +42,25 @@
                <children>
                   <LineChart fx:id="bestMatchSignal" animated="false" createSymbols="false" HBox.hgrow="ALWAYS">
                     <xAxis>
-                      <NumberAxis side="BOTTOM" autoRanging="true"/>
+                      <NumberAxis autoRanging="true" side="BOTTOM" />
                     </xAxis>
                     <yAxis>
-                      <NumberAxis side="LEFT" autoRanging="false" lowerBound="-1" upperBound="1"/>
+                      <NumberAxis autoRanging="false" lowerBound="-2" side="LEFT" tickUnit="0.5" upperBound="2" />
                     </yAxis>
                   </LineChart>
                   
                   <LineChart fx:id="fftSignal" animated="false" createSymbols="false" HBox.hgrow="ALWAYS">
                     <xAxis>
-                      <NumberAxis side="BOTTOM" autoRanging="false" lowerBound="0" upperBound="10000" tickUnit="1000"/>
+                      <NumberAxis autoRanging="false" lowerBound="0" side="BOTTOM" tickUnit="2000" upperBound="10000" />
                     </xAxis>
                     <yAxis>
-                      <NumberAxis side="LEFT" autoRanging="false" lowerBound="0" upperBound="100" tickUnit="20"/>
+                      <NumberAxis autoRanging="false" lowerBound="0" side="LEFT" tickUnit="10" upperBound="100" />
                     </yAxis>
                   </LineChart>
                   
-                  <AnchorPane prefHeight="322.0" prefWidth="364.0" HBox.hgrow="NEVER">
+                  <AnchorPane prefHeight="308.0" prefWidth="97.0" HBox.hgrow="NEVER">
                      <children>
-                        <Circle id="indicatorCircle" fx:id="indicatorCircle" fill="#ff1f1f" layoutX="125.0" layoutY="140.0" radius="100.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="2.0" />
+                        <Circle id="indicatorCircle" fx:id="indicatorCircle" fill="#ff1f1f" layoutX="70.0" layoutY="81.0" radius="52.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="2.0" />
                      </children></AnchorPane>
                </children>
             </HBox>

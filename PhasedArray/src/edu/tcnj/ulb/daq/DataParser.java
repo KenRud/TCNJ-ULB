@@ -1,6 +1,5 @@
 package edu.tcnj.ulb.daq;
 
-import edu.tcnj.ulb.Configuration;
 
 
 public class DataParser {
