@@ -12,7 +12,8 @@ public class DataProcessor {
 	private static final double THETA_INCREMENT = 45;
 	private static final double PHI_INCREMENT = 45;
 	private static final int[] EMPTY_SIGNAL = new int[0];
-	
+	public static final double[] EMPTY_FFT = new double[0];
+
 	public static double[] SEARCH_SIGNAL = new double[WINDOW_SIZE];
 
 	private final Recording recording;
@@ -22,6 +23,7 @@ public class DataProcessor {
 	
 	// Used for displaying the best matching signal
 	private int[] bestMatchSignal;
+	private double[] fftMatchSignal;
 	private double maxMatchMagnitude;
 
 	static {
@@ -51,11 +53,13 @@ public class DataProcessor {
 		resetBestMatch();
 		processAllAngles(window);
 		results.setBestMatchSignal(calculateTime(windowIndex), bestMatchSignal);
+		results.setFFTSignal(fftMatchSignal);
 		windowIndex += WINDOW_SIZE;
 	}
 
 	private void resetBestMatch() {
 		bestMatchSignal = EMPTY_SIGNAL;
+		fftMatchSignal = EMPTY_FFT;
 		maxMatchMagnitude = 0;
 	}
 
@@ -97,6 +101,7 @@ public class DataProcessor {
 				if (max > maxMatchMagnitude) {
 					maxMatchMagnitude = max;
 					bestMatchSignal = combinedSignal;
+					fftMatchSignal = fft;
 				}
 			}
 		}

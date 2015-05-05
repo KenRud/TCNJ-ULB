@@ -15,15 +15,17 @@ import edu.tcnj.ulb.daq.Recording;
 
 public class MainController {
 	private static final String BEST_MATCH_SIGNAL_SERIES_NAME = "Best Match Signal";
+	private static final String FFT_SIGNAL_SERIES_NAME = "FFT Series";
 	@FXML private Button loadButton;
 	@FXML private Button recordButton;
 //	@FXML private LineChart<Double, Double> searchSignal;
 	@FXML private LineChart<Integer, Integer> bestMatchSignal;
-	
+	@FXML private LineChart<Double, Double> fftSignal;
+
 	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 	private MainApp mainApp;
 	private ProcessingTask processingTask;
-	
+
 	@FXML
 	private void initialize() {
 		loadButton.setOnAction((event) -> {
@@ -34,12 +36,13 @@ public class MainController {
 				Recording recording = Recording.load(file.getPath());
 				processingTask = new ProcessingTask(recording);
 				initBestMatchTimeChart(processingTask);
+				initFFTSignalChart(processingTask);
 				executorService.execute(processingTask);
 			}catch(IOException e) {
 				e.printStackTrace();
 			}
 		});
-		
+
 		recordButton.setOnAction((event) -> {
 			FileChooser chooser = new FileChooser();
 			chooser.setTitle("Select location to save the recording");
@@ -47,7 +50,7 @@ public class MainController {
 		});
 //		createSearchSignalGraph();
 	}
-	
+
 	public void setMainApp(MainApp mainApp) {
 		this.mainApp = mainApp;
 	}
@@ -85,5 +88,15 @@ public class MainController {
 //		series.setData(processingTask.fftResultsProperty().stream().sequential().map(d -> {
 //			return new XYChart.Data<Double, Double>(d, 3.);
 //		}).collect(()));
+	}
+
+	private void initFFTSignalChart(ProcessingTask task) {
+		fftSignal.getXAxis().setAutoRanging(true);
+		fftSignal.getYAxis().setAutoRanging(true);
+		Series<Double, Double> series = new Series<>(
+				FFT_SIGNAL_SERIES_NAME, task.getResults()
+				.fftMatchSignalProperty());
+		fftSignal.getData().clear();
+		fftSignal.getData().add(series);
 	}
 }

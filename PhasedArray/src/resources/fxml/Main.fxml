@@ -29,7 +29,7 @@
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" />
             <HBox prefHeight="100.0" prefWidth="200.0">
                <children>
-                  <LineChart fx:id="bestMatchSignal" createSymbols="false" HBox.hgrow="ALWAYS" animated="false">
+                  <LineChart fx:id="bestMatchSignal" animated="false" createSymbols="false" HBox.hgrow="ALWAYS">
                     <xAxis>
                       <NumberAxis side="BOTTOM" />
                     </xAxis>
@@ -37,9 +37,9 @@
                       <NumberAxis side="LEFT" />
                     </yAxis>
                   </LineChart>
-                  <LineChart createSymbols="false" HBox.hgrow="ALWAYS">
+                  <LineChart fx:id="fftSignal" animated="false" createSymbols="false" HBox.hgrow="ALWAYS">
                     <xAxis>
-                      <NumberAxis  side="BOTTOM" />
+                      <NumberAxis side="BOTTOM" />
                     </xAxis>
                     <yAxis>
                       <NumberAxis side="LEFT" />
