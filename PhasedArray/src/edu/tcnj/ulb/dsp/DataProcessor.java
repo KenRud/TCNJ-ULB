@@ -114,14 +114,10 @@ public class DataProcessor {
 	private void computeXCorr(int[] timeDelayedSignal) {
 		double[] signal = copyFromIntArray(timeDelayedSignal);
 		double[] crossCorrelation = Correlation.xcorr(signal, SEARCH_SIGNAL);
-
-		for (int i = 0; i < crossCorrelation.length; i++) {
-			//System.out.println(i + " : " + crossCorrelation[i]);
-		}
+		// Check for peak in cross correlation output
 		boolean isMatch = matchDetectionXCorr(crossCorrelation);
-		System.out.println("signal Length :" + signal.length + "isMatch" + isMatch);
 	}
-	
+
 	private double[] computeFFT(int[] timeDelayedSignal) {
 		Complex[] complexSignal = new Complex[WINDOW_SIZE];
 		Complex temp;
