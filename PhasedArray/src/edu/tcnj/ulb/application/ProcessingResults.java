@@ -52,14 +52,13 @@ public class ProcessingResults {
 		}
 	}
 
-	public void setFFTSignal(double[] freqResponse){
-
-		outgoingFFTSignal = new ArrayList<>(freqResponse.length);
-		for (int i = 0; i < freqResponse.length; i++) {
-			fftSignal.add(new Data<>((double)i, freqResponse[i]));
+	public void setFFTSignal(double[] freqResponse) {
+		int halfLength = freqResponse.length / 2;
+		outgoingFFTSignal = new ArrayList<>(halfLength);
+		for (int i = 5; i < halfLength; i++) {
+			outgoingFFTSignal.add(new Data<>((double) i * samplingFrequency
+					/ freqResponse.length, freqResponse[i]));
 		}
-
-
 	}
 	
 	public void render() throws InterruptedException {

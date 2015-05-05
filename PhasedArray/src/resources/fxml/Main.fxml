@@ -42,20 +42,22 @@
                <children>
                   <LineChart fx:id="bestMatchSignal" animated="false" createSymbols="false" HBox.hgrow="ALWAYS">
                     <xAxis>
-                      <NumberAxis side="BOTTOM" />
+                      <NumberAxis side="BOTTOM" autoRanging="true"/>
                     </xAxis>
                     <yAxis>
-                      <NumberAxis side="LEFT" />
+                      <NumberAxis side="LEFT" autoRanging="false" lowerBound="-1" upperBound="1"/>
                     </yAxis>
                   </LineChart>
+                  
                   <LineChart fx:id="fftSignal" animated="false" createSymbols="false" HBox.hgrow="ALWAYS">
                     <xAxis>
-                      <NumberAxis side="BOTTOM" />
+                      <NumberAxis side="BOTTOM" autoRanging="false" lowerBound="0" upperBound="10000" tickUnit="1000"/>
                     </xAxis>
                     <yAxis>
-                      <NumberAxis side="LEFT" />
+                      <NumberAxis side="LEFT" autoRanging="false" lowerBound="0" upperBound="100" tickUnit="20"/>
                     </yAxis>
                   </LineChart>
+                  
                   <AnchorPane prefHeight="322.0" prefWidth="364.0" HBox.hgrow="NEVER">
                      <children>
                         <Circle id="indicatorCircle" fx:id="indicatorCircle" fill="#ff1f1f" layoutX="125.0" layoutY="140.0" radius="100.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="2.0" />

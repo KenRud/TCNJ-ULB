@@ -9,6 +9,7 @@ import edu.tcnj.ulb.Configuration;
 import edu.tcnj.ulb.dsp.DataProcessor;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Alert;
@@ -26,6 +27,8 @@ public class MainController {
 	@FXML private LineChart<Double, Double> searchSignal;
 	@FXML private LineChart<Integer, Double> bestMatchSignal;
 	@FXML private LineChart<Double, Double> fftSignal;
+	@FXML private NumberAxis fftSignalX;
+	@FXML private NumberAxis fftSignalY;
 
 	Recording recording;
 
@@ -100,28 +103,14 @@ public class MainController {
 	 }
 
 	private void initBestMatchTimeChart(ProcessingTask task) {
-		bestMatchSignal.getXAxis().setAutoRanging(true);
-		bestMatchSignal.getYAxis().setAutoRanging(true);
 		Series<Integer, Double> series = new Series<>(
 				BEST_MATCH_SIGNAL_SERIES_NAME, task.getResults()
 						.bestMatchSignalProperty());
 		bestMatchSignal.getData().clear();
 		bestMatchSignal.getData().add(series);
-		// for(int i = 0; i < fftPoints.length; i++){
-		// series.getData().add(new XYChart.Data<>((double) i, fftPoints[i]));
-		// }
-//		processingTask.fftResultsProperty().stream().sequential().map(d -> {
-//			return new XYChart.Data<Double, Double>(d, 3.);
-//		});
-//
-//		series.setData(processingTask.fftResultsProperty().stream().sequential().map(d -> {
-//			return new XYChart.Data<Double, Double>(d, 3.);
-//		}).collect(()));
 	}
 
 	private void initFFTSignalChart(ProcessingTask task) {
-		fftSignal.getXAxis().setAutoRanging(true);
-		fftSignal.getYAxis().setAutoRanging(true);
 		Series<Double, Double> series = new Series<>(
 				FFT_SIGNAL_SERIES_NAME, task.getResults()
 				.fftMatchSignalProperty());

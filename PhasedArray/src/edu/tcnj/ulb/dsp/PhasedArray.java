@@ -61,7 +61,7 @@ public class PhasedArray {
 			short[] sequence = window[channel];
 			int advance = delays[channel] + maxAdvance;
 			for (int i = 0; i < sequence.length; i++) {
-				result[i + advance] += sequence[i] / (Configuration.DC_OFFSET * 9.0);
+				result[i + advance] += sequence[i] / (Configuration.MAX_AMPLITUDE * 9.0);
 			}
 		}
 		return result;

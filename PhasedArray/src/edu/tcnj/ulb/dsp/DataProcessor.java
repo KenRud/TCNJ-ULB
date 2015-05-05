@@ -8,7 +8,7 @@ import edu.tcnj.ulb.daq.DataParser;
 import edu.tcnj.ulb.daq.Recording;
 
 public class DataProcessor {
-	private static final int WINDOW_SIZE = 1024;
+	private static final int WINDOW_SIZE = 512;
 	private static final double THETA_INCREMENT = 45;
 	private static final double PHI_INCREMENT = 45;
 	private static final double[] EMPTY_SIGNAL = new double[0];
@@ -147,7 +147,6 @@ public class DataProcessor {
 	
 	private double[] computeMagnitude(Complex[] x){
 		double[] magnitudeValues = new double[x.length];
-
 		for(int i = 0; i < x.length; i++){
 			magnitudeValues[i] = x[i].abs();
 		}

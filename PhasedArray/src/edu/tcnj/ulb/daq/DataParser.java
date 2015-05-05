@@ -58,7 +58,7 @@ public class DataParser {
 			if (!recording.isValid(bufferIndex)) {
 				throw new IndexOutOfBoundsException();
 			}
-			return (short) (recording.get(bufferIndex) - Configuration.DC_OFFSET);
+			return (short) (recording.get(bufferIndex));
 		}
 		
 		public short[] get(long start, int length) {
