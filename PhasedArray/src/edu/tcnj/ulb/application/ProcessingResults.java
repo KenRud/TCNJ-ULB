@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyListProperty;
@@ -13,6 +12,8 @@ import javafx.collections.FXCollections;
 import javafx.scene.chart.XYChart.Data;
 
 public class ProcessingResults {
+	private static final int RENDER_WAIT_MILLIS = 100;
+
 	private static final int RENDER_QUEUE_SIZE = 2;
 
 	private final int samplingFrequency;
@@ -71,14 +72,13 @@ public class ProcessingResults {
 					matchSignal.get().setAll(outgoingMatchSignal);
 					fftSignal.get().setAll(outgoingFFTSignal);
 					
-					renderSync.notifyAll();
+					renderSync.notify();
 				}
 			});
 			
 			// Wait for render to complete
-			while (renderCount >= RENDER_QUEUE_SIZE) {
-				renderSync.wait();
-			}
+			renderSync.wait();
+			Thread.sleep(RENDER_WAIT_MILLIS);
 		}
 	}
 }
