@@ -1,5 +1,6 @@
 package edu.tcnj.ulb.daq;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
@@ -24,6 +25,10 @@ public class Recording {
 	
 	public static Recording create(String path) {
 		return create(path, DEFUALT_FILE_SIZE);
+	}
+
+	public static Recording create(File path) {
+		return create(path.toString(), DEFUALT_FILE_SIZE);
 	}
 	
 	public static Recording create(String path, int fileSize) {

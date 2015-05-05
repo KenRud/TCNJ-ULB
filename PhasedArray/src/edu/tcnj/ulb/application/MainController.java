@@ -18,9 +18,12 @@ public class MainController {
 	private static final String FFT_SIGNAL_SERIES_NAME = "FFT Series";
 	@FXML private Button loadButton;
 	@FXML private Button recordButton;
+	@FXML private Button stopButton;
 //	@FXML private LineChart<Double, Double> searchSignal;
 	@FXML private LineChart<Integer, Integer> bestMatchSignal;
 	@FXML private LineChart<Double, Double> fftSignal;
+
+	Recording recording;
 
 	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 	private MainApp mainApp;
@@ -33,7 +36,7 @@ public class MainController {
 			chooser.setTitle("Load a past recording");
 			File file = chooser.showDialog(mainApp.getPrimaryStage());
 			try{
-				Recording recording = Recording.load(file.getPath());
+				recording = Recording.load(file.getPath());
 				processingTask = new ProcessingTask(recording);
 				initBestMatchTimeChart(processingTask);
 				initFFTSignalChart(processingTask);
@@ -44,10 +47,24 @@ public class MainController {
 		});
 
 		recordButton.setOnAction((event) -> {
-			FileChooser chooser = new FileChooser();
+			DirectoryChooser chooser = new DirectoryChooser();
 			chooser.setTitle("Select location to save the recording");
-			File file = chooser.showSaveDialog(mainApp.getPrimaryStage());
+			File file = chooser.showDialog(mainApp.getPrimaryStage());
+
+			recording = Recording.create(file);
+			recording.start();
 		});
+
+		stopButton.setOnAction((event) -> {
+			try{
+				recording.stop();
+			}catch(IOException e){
+				e.printStackTrace();
+			}
+
+		});
+
+
 //		createSearchSignalGraph();
 	}
 
