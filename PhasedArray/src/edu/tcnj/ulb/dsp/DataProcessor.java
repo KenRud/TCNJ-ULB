@@ -191,7 +191,8 @@ public class DataProcessor {
 		}
 		return matchFound;
 	}
-	
+
+	// TODO: Correct implementation of cross correlation detection
 	private boolean matchDetectionXCorr(double[] xCorr){
 		double averageMagnitude = 0;
 		boolean match;
@@ -207,8 +208,7 @@ public class DataProcessor {
 		}
 
 		peak = peak / 7;
-		System.out.println("Peak " + peak);
-		System.out.println("Average " + averageMagnitude);
+
 		if(peak > averageMagnitude * 1.5){
 			match = true;
 		} else {
