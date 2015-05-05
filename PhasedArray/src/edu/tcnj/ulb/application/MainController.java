@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import edu.tcnj.ulb.Configuration;
+import edu.tcnj.ulb.dsp.DataProcessor;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -20,7 +23,7 @@ public class MainController {
 	@FXML private Button loadButton;
 	@FXML private Button recordButton;
 	@FXML private Button stopButton;
-//	@FXML private LineChart<Double, Double> searchSignal;
+	@FXML private LineChart<Double, Double> searchSignal;
 	@FXML private LineChart<Integer, Integer> bestMatchSignal;
 	@FXML private LineChart<Double, Double> fftSignal;
 
@@ -72,27 +75,29 @@ public class MainController {
 		});
 
 
-//		createSearchSignalGraph();
+		createSearchSignalGraph();
 	}
 
 	public void setMainApp(MainApp mainApp) {
 		this.mainApp = mainApp;
 	}
 
-//	private void createSearchSignalGraph(){
-//		searchSignal.setTitle("Search Signal");
-//
-//		XYChart.Series<Double, Double> series = new XYChart.Series<>();
-//		series.setName("Search Signal");
-//
-//		for(int i = 0; i < SEARCH_SIGNAL.length / 4; i++){
-//			double time = (double) i / Configuration.SAMPLE_FREQUENCY;
-//			series.getData().add(new XYChart.Data<>(time, SEARCH_SIGNAL[i]));
-//		}
-//
-	// searchSignal.getData().add(series);
-	//
-	// }
+	private void createSearchSignalGraph(){
+		searchSignal.getXAxis().setAutoRanging(true);
+		searchSignal.getYAxis().setAutoRanging(true);
+		searchSignal.setTitle("Search Signal");
+
+		XYChart.Series<Double, Double> series = new XYChart.Series<>();
+		series.setName("Search Signal");
+
+		for(int i = 0; i < DataProcessor.SEARCH_SIGNAL.length/4; i++){
+			double time = (double) i / Configuration.SAMPLE_FREQUENCY;
+			series.getData().add(new XYChart.Data<>(time, DataProcessor.SEARCH_SIGNAL[i]));
+		}
+
+	 searchSignal.getData().add(series);
+
+	 }
 
 	private void initBestMatchTimeChart(ProcessingTask task) {
 		bestMatchSignal.getXAxis().setAutoRanging(true);
