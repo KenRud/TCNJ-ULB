@@ -11,7 +11,7 @@ public class DataProcessor {
 	private static final int WINDOW_SIZE = 1024;
 	private static final double THETA_INCREMENT = 45;
 	private static final double PHI_INCREMENT = 45;
-	private static final int[] EMPTY_SIGNAL = new int[0];
+	private static final double[] EMPTY_SIGNAL = new double[0];
 	public static final double[] EMPTY_FFT = new double[0];
 
 	public static double[] SEARCH_SIGNAL = new double[WINDOW_SIZE];
@@ -22,7 +22,7 @@ public class DataProcessor {
 	private long windowIndex;
 	
 	// Used for displaying the best matching signal
-	private int[] bestMatchSignal;
+	private double[] bestMatchSignal;
 	private double[] fftMatchSignal;
 	private double maxMatchMagnitude;
 
@@ -91,7 +91,7 @@ public class DataProcessor {
 		for (double theta = 0; theta < 360; theta += THETA_INCREMENT) {
 			for (double phi = 0; phi < 45; phi += PHI_INCREMENT) {
 				PhasedArray array = new PhasedArray(phi, theta, window);
-				int[] combinedSignal = array.combineChannels();
+				double[] combinedSignal = array.combineChannels();
 				double[] fft = computeFFT(combinedSignal);
 				computeXCorr(combinedSignal);
 				
@@ -116,14 +116,13 @@ public class DataProcessor {
 		return max;
 	}
 	
-	private void computeXCorr(int[] timeDelayedSignal) {
-		double[] signal = copyFromIntArray(timeDelayedSignal);
-		double[] crossCorrelation = Correlation.xcorr(signal, SEARCH_SIGNAL);
+	private void computeXCorr(double[] timeDelayedSignal) {
+		double[] crossCorrelation = Correlation.xcorr(timeDelayedSignal, SEARCH_SIGNAL);
 		// Check for peak in cross correlation output
 		boolean isMatch = matchDetectionXCorr(crossCorrelation);
 	}
 
-	private double[] computeFFT(int[] timeDelayedSignal) {
+	private double[] computeFFT(double[] timeDelayedSignal) {
 		Complex[] complexSignal = new Complex[WINDOW_SIZE];
 		Complex temp;
 

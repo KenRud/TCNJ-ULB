@@ -24,7 +24,7 @@ public class MainController {
 	@FXML private Button recordButton;
 	@FXML private Button stopButton;
 	@FXML private LineChart<Double, Double> searchSignal;
-	@FXML private LineChart<Integer, Integer> bestMatchSignal;
+	@FXML private LineChart<Integer, Double> bestMatchSignal;
 	@FXML private LineChart<Double, Double> fftSignal;
 
 	Recording recording;
@@ -102,7 +102,7 @@ public class MainController {
 	private void initBestMatchTimeChart(ProcessingTask task) {
 		bestMatchSignal.getXAxis().setAutoRanging(true);
 		bestMatchSignal.getYAxis().setAutoRanging(true);
-		Series<Integer, Integer> series = new Series<>(
+		Series<Integer, Double> series = new Series<>(
 				BEST_MATCH_SIGNAL_SERIES_NAME, task.getResults()
 						.bestMatchSignalProperty());
 		bestMatchSignal.getData().clear();

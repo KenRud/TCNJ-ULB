@@ -54,14 +54,14 @@ public class PhasedArray {
 	 * @return A signal signal created by combining the phased channels. This signal is not
 	 * normalized. The signal may be longer than each of the individual channels.
 	 */
-	public int[] combineChannels() {
+	public double[] combineChannels() {
 		int sequenceLength = maxAdvance + maxDelay + window[0].length;
-		int[] result = new int[sequenceLength];
+		double[] result = new double[sequenceLength];
 		for (int channel = 0; channel < window.length; channel++) {
 			short[] sequence = window[channel];
 			int advance = delays[channel] + maxAdvance;
 			for (int i = 0; i < sequence.length; i++) {
-				result[i + advance] += sequence[i];
+				result[i + advance] += sequence[i] / (Configuration.DC_OFFSET * 9.0);
 			}
 		}
 		return result;

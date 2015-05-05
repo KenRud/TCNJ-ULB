@@ -1,9 +1,9 @@
 package edu.tcnj.ulb.daq;
 
+import edu.tcnj.ulb.Configuration;
+
 
 public class DataParser {
-	private static final int DC_OFFSET = 2048;
-	
 	private final int numChannels;
 	private final int chunkSize;
 	private final int chunkSeparation;
@@ -58,7 +58,7 @@ public class DataParser {
 			if (!recording.isValid(bufferIndex)) {
 				throw new IndexOutOfBoundsException();
 			}
-			return (short) (recording.get(bufferIndex) - DC_OFFSET);
+			return (short) (recording.get(bufferIndex) - Configuration.DC_OFFSET);
 		}
 		
 		public short[] get(long start, int length) {

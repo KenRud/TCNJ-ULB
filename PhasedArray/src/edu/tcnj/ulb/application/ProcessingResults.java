@@ -21,9 +21,9 @@ public class ProcessingResults {
 	private final Object renderSync = new Object();
 	private volatile int renderCount;
 	
-	private final ReadOnlyListWrapper<Data<Integer, Integer>> matchSignal =
+	private final ReadOnlyListWrapper<Data<Integer, Double>> matchSignal =
 			new ReadOnlyListWrapper<>(this, "matchSignal", FXCollections.observableArrayList());
-	private ArrayList<Data<Integer, Integer>> outgoingMatchSignal = new ArrayList<>();
+	private ArrayList<Data<Integer, Double>> outgoingMatchSignal = new ArrayList<>();
 
 	private final ReadOnlyListWrapper<Data<Double, Double>> fftSignal =
 			new ReadOnlyListWrapper<>(this, "fftSignal", FXCollections.observableArrayList());
@@ -33,7 +33,7 @@ public class ProcessingResults {
 		this.samplingFrequency = samplingFrequency;
 	}
 
-	public final ReadOnlyListProperty<Data<Integer, Integer>> bestMatchSignalProperty() {
+	public final ReadOnlyListProperty<Data<Integer, Double>> bestMatchSignalProperty() {
 		return matchSignal.getReadOnlyProperty();
 	}
 
@@ -41,7 +41,7 @@ public class ProcessingResults {
 		return fftSignal.getReadOnlyProperty();
 	}
 	
-	public void setBestMatchSignal(Instant startTime, int[] data) {
+	public void setBestMatchSignal(Instant startTime, double[] data) {
 		outgoingMatchSignal = new ArrayList<>(data.length);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(
 				"yyyyMMddHHmmss").withZone(ZoneId.systemDefault());
@@ -66,7 +66,7 @@ public class ProcessingResults {
 		synchronized (renderSync) {
 			renderCount++;
 
-			final List<Data<Integer, Integer>> outgoingMatchSignal = new ArrayList<>(
+			final List<Data<Integer, Double>> outgoingMatchSignal = new ArrayList<>(
 					this.outgoingMatchSignal);
 			final List<Data<Double, Double>> outgoingFFTSignal = new ArrayList<>(
 					this.outgoingFFTSignal);
