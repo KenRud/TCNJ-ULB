@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart.Series;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -58,6 +59,12 @@ public class MainController {
 		stopButton.setOnAction((event) -> {
 			try{
 				recording.stop();
+				Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				alert.setTitle("Recording Finished");
+				alert.setHeaderText("Your Recording Has Finished!");
+				alert.setContentText("The recording has been saved under the directory chosen by you.");
+
+				alert.showAndWait();
 			}catch(IOException e){
 				e.printStackTrace();
 			}
