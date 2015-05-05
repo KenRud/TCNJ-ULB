@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyListProperty;
@@ -64,7 +65,12 @@ public class ProcessingResults {
 	public void render() throws InterruptedException {
 		synchronized (renderSync) {
 			renderCount++;
-			
+
+			final List<Data<Integer, Integer>> outgoingMatchSignal = new ArrayList<>(
+					this.outgoingMatchSignal);
+			final List<Data<Double, Double>> outgoingFFTSignal = new ArrayList<>(
+					this.outgoingFFTSignal);
+
 			Platform.runLater(()-> {
 				synchronized (renderSync) {
 					renderCount--;

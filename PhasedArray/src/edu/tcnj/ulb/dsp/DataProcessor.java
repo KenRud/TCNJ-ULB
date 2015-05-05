@@ -8,7 +8,7 @@ import edu.tcnj.ulb.daq.DataParser;
 import edu.tcnj.ulb.daq.Recording;
 
 public class DataProcessor {
-	private static final int WINDOW_SIZE = 512;
+	private static final int WINDOW_SIZE = 1024;
 	private static final double THETA_INCREMENT = 45;
 	private static final double PHI_INCREMENT = 45;
 	private static final int[] EMPTY_SIGNAL = new int[0];
